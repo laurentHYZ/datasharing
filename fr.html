@@ -1,0 +1,776 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Extraction de connaissances PME</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.18);
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --text: #e8eaf6;
+      --text-muted: #8b8fa8;
+      --text-dim: #5a5e78;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 64px;
+    }
+
+    .header {
+      max-width: 780px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #e8eaf6 30%, var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .lang-switcher {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .lang-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .lang-btn.active { background: var(--accent-glow); border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+
+    .card {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .select-wrapper { position: relative; }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      padding: 14px 44px 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    select option { background: var(--surface2); color: var(--text); }
+
+    #empty-state {
+      max-width: 780px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-dim);
+    }
+    #empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    #empty-state p { font-size: 14px; line-height: 1.6; }
+
+    #questions-section { display: none; }
+    #questions-section.visible { display: block; }
+
+    .section-header {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .section-header .line { flex: 1; height: 1px; background: var(--border); }
+    .section-header .count {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+
+    .question-card {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 20px 16px;
+      transition: border-color 0.2s;
+    }
+    .question-card:focus-within { border-color: rgba(99,102,241,0.4); }
+    .q-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .q-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-hover);
+      margin-top: 1px;
+    }
+    .q-label { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
+    .q-hint { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; padding-left: 34px; line-height: 1.4; }
+    .q-input-row { display: flex; gap: 8px; align-items: flex-start; }
+
+    textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 12px 14px;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea::placeholder { color: var(--text-dim); }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .mic-btn {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .mic-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .mic-btn.recording {
+      border-color: var(--danger);
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      animation: pulse-mic 1.2s ease-in-out infinite;
+    }
+    .mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+    .mic-btn.unsupported:hover { border-color: var(--border); color: var(--text-muted); background: var(--surface2); }
+    @keyframes pulse-mic {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+    .mic-icon { width: 18px; height: 18px; }
+
+    .status-bar {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      min-height: 20px;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
+    .status-dot.recording { background: var(--danger); animation: blink 1s step-start infinite; }
+    .status-dot.done { background: var(--success); }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .progress-wrap { max-width: 780px; margin: 0 auto 28px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+    .progress-track { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    #export-section { max-width: 780px; margin: 32px auto 0; display: none; }
+    #export-section.visible { display: block; }
+    .export-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .export-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .export-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    .export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-success { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 100;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: rgba(34,197,94,0.4); color: var(--success); }
+    #toast.info    { border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+
+    .speech-warn {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--warning);
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 16px 10px 56px; }
+      .card, .question-card, .export-card { padding: 16px; }
+      .export-actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="lang-switcher">
+  <a class="lang-btn" href="index.html">🇬🇧 English</a>
+  <span class="lang-btn active">🇫🇷 Français</span>
+</div>
+
+<div class="header">
+  <div class="badge">Outil de connaissance PME</div>
+  <h1>Extraction de connaissances métier</h1>
+  <p>Répondez à ces questions pour créer un bilan structuré de votre entreprise. Utilisez le micro pour dicter vos réponses, puis exportez en Markdown pour Claude ou tout autre outil IA.</p>
+</div>
+
+<div class="speech-warn" id="speech-warn">
+  Votre navigateur ne prend pas en charge l'API Web Speech. La saisie vocale est désactivée. Chrome ou Edge est recommandé pour la reconnaissance vocale.
+</div>
+
+<div class="card">
+  <div class="card-label">Étape 1 — Sélectionnez votre secteur</div>
+  <div class="select-wrapper">
+    <select id="industry-select" aria-label="Sélectionnez votre secteur">
+      <option value="">Choisissez votre secteur...</option>
+      <option value="legal">Juridique</option>
+      <option value="accountant">Comptabilité &amp; Finance</option>
+      <option value="realestate">Immobilier</option>
+      <option value="marketing">Agence de marketing</option>
+      <option value="cleaning">Nettoyage industriel</option>
+      <option value="construction">Construction</option>
+      <option value="restaurants">Restauration</option>
+      <option value="hospitality">Hôtellerie, Hébergement &amp; Camping</option>
+      <option value="other">Autre</option>
+    </select>
+  </div>
+</div>
+
+<div id="empty-state">
+  <div class="icon">🏢</div>
+  <p>Sélectionnez votre secteur ci-dessus pour voir des questions adaptées à votre modèle économique, vos défis et votre flux de travail.</p>
+</div>
+
+<div id="questions-section">
+  <div class="section-header">
+    <h2>Vos questions</h2>
+    <div class="line"></div>
+    <div class="count" id="q-count">0 questions</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progress-label">0 sur 0 répondues</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Prêt — appuyez sur un micro pour commencer à parler</span>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <div id="export-section">
+    <div class="export-card">
+      <h3>Exportez votre bilan de connaissances</h3>
+      <p>Vos réponses sont prêtes à être exportées en fichier Markdown structuré — collez-le directement dans Claude ou tout autre outil IA pour générer des documents métier, des procédures ou des stratégies.</p>
+      <div class="export-actions">
+        <button class="btn btn-primary" id="copy-btn" onclick="copyMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copier en Markdown
+        </button>
+        <button class="btn btn-secondary" id="download-btn" onclick="downloadMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Télécharger le fichier .md
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Tout effacer
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const QUESTIONS = {
+  legal: [
+    { q: "Dans quels domaines du droit vous spécialisez-vous ?", hint: "ex. droit de la famille, droit des sociétés, droit pénal, immigration, propriété intellectuelle, etc." },
+    { q: "Comment vos clients vous trouvent-ils et à quoi ressemble votre processus d'admission ?", hint: "Du premier contact à la signature de la lettre de mission." },
+    { q: "À quoi ressemble le cycle de vie typique d'un dossier dans votre cabinet ?", hint: "Étapes, jalons, durée habituelle." },
+    { q: "Quel modèle de facturation utilisez-vous et comment gérez-vous vos honoraires ?", hint: "Honoraires horaires, forfait, honoraires de résultat, provision — et votre logiciel de facturation." },
+    { q: "Comment gérez-vous les délais, audiences et tâches sur l'ensemble des dossiers actifs ?", hint: "Outils, processus ou systèmes sur lesquels vous vous appuyez." },
+    { q: "Quel logiciel de gestion de cabinet ou de documents utilisez-vous ?", hint: "ex. Clio, MyCase, NetDocuments, SharePoint, etc." },
+    { q: "Quelles obligations déontologiques ou réglementaires créent le plus de charge administrative ?", hint: "Comptabilité des fonds clients, vérification des conflits d'intérêts, exigences du barreau, etc." },
+    { q: "Comment gérez-vous la communication avec les clients et le partage sécurisé de documents ?", hint: "Email, portails clients, messagerie chiffrée, etc." },
+    { q: "Quelles sont vos principales pertes de temps qui vous éloignent du travail facturable ?", hint: "Tâches administratives, relance de documents, suivi clients, etc." },
+    { q: "À quoi ressemble la croissance pour votre cabinet et qu'est-ce qui la freine ?", hint: "Recrutement, marketing, recommandations, spécialisation, etc." },
+  ],
+  accountant: [
+    { q: "Dans quels services comptables vous spécialisez-vous ?", hint: "Déclarations fiscales, comptabilité, audit, conseil financier, paie, expertise judiciaire, etc." },
+    { q: "Comment gérez-vous les pics de charge lors des périodes chargées ?", hint: "Stratégies de personnel, planification clients, outils d'aide." },
+    { q: "Quel est votre stack logiciel complet pour le travail client ?", hint: "Logiciel fiscal, plateforme comptable, gestion documentaire, outils de communication." },
+    { q: "Comment fixez-vous et structurez-vous vos tarifs ?", hint: "Forfaits, honoraires horaires, facturation à la valeur, abonnement, etc." },
+    { q: "À quoi ressemble votre processus d'intégration client du premier appel au démarrage des travaux ?", hint: "Lettres de mission, collecte de données, étapes de mise en place, délais." },
+    { q: "Quels sont les problèmes de qualité des données les plus fréquents avec les nouveaux clients ?", hint: "Comptes désordonnés, pièces manquantes, mauvaises catégorisations, etc." },
+    { q: "Comment restez-vous à jour sur les évolutions fiscales et réglementaires ?", hint: "Formation continue, abonnements, groupes professionnels, etc." },
+    { q: "Comment gérez-vous la communication client et la remise des livrables ?", hint: "Email, portails, appels de révision, délais de retour attendus." },
+    { q: "Quelles obligations réglementaires créent le plus de friction opérationnelle ?", hint: "Délais de dépôt, obligations de télédéclaration, enregistrements régionaux, etc." },
+    { q: "Quel est votre plus grand défi pour développer ou faire évoluer votre cabinet ?", hint: "Personnel, automatisation, acquisition de clients, pouvoir de fixation des prix, etc." },
+  ],
+  realestate: [
+    { q: "Vous concentrez-vous sur le résidentiel, le commercial, ou les deux — et sur quels marchés ?", hint: "Types de biens, zones géographiques, gammes de prix." },
+    { q: "Comment générez-vous des contacts et construisez-vous votre pipeline acheteurs/vendeurs ?", hint: "Recommandations, portails immobiliers, réseaux sociaux, réseau de proximité, visites, etc." },
+    { q: "Décrivez votre transaction type du premier contact à la signature.", hint: "Étapes clés, calendrier, intervenants." },
+    { q: "Comment gérez-vous les mandats — de la préparation à la commercialisation jusqu'aux offres ?", hint: "Photos, portails, conseils home staging, organisation des visites, gestion des offres." },
+    { q: "Quels outils CRM et de gestion des transactions utilisez-vous ?", hint: "ex. logiciels CRM, plateformes de signature électronique, outils de suivi des visites, etc." },
+    { q: "Quelle est votre structure de commission et comment gérez-vous les négociations ?", hint: "Partages habituels, situations de double mandat, votre approche de négociation." },
+    { q: "Comment restez-vous en contact avec vos anciens clients pour fidéliser et générer des recommandations ?", hint: "Campagnes email, appels, événements, automatisation CRM, etc." },
+    { q: "Comment gérez-vous l'aspect administratif — contrats, conformité, paperasse ?", hint: "Qui s'en occupe, quels outils, quels sont les goulots d'étranglement." },
+    { q: "Quelles tendances ou difficultés du marché affectent le plus votre activité en ce moment ?", hint: "Taux d'intérêt, stock de biens, sentiment des acheteurs, concurrence, etc." },
+    { q: "Qu'est-ce qui ferait la plus grande différence pour votre productivité ou vos revenus cette année ?", hint: "Plus de contacts, de meilleurs systèmes, une équipe, une spécialisation, la technologie, etc." },
+  ],
+  marketing: [
+    { q: "Quels services spécifiques votre agence propose-t-elle ?", hint: "SEO, publicité payante, réseaux sociaux, contenu, email, branding, web, relations publiques, etc." },
+    { q: "Comment structurez-vous les missions clients et fixez-vous vos tarifs ?", hint: "Forfait mensuel, projet ponctuel, à la performance, hybride." },
+    { q: "À quoi ressemble votre processus d'intégration client ?", hint: "Découverte, stratégie, mise en place des comptes, lancement, calendrier des premiers livrables." },
+    { q: "Comment rendez-vous compte des résultats aux clients et gérez-vous leurs attentes ?", hint: "Fréquence, format, KPIs suivis, outils de reporting utilisés." },
+    { q: "Quels outils et plateformes votre équipe utilise-t-elle au quotidien ?", hint: "Gestion de projet, plateformes publicitaires, analytics, design, CRM, communication, etc." },
+    { q: "Comment gérez-vous les délais, la capacité et la charge de travail de l'équipe ?", hint: "Ce qui déraille, ce qui fonctionne, comment vous gérez la surcharge." },
+    { q: "Comment gérez-vous le glissement de périmètre et les demandes de modification ?", hint: "Votre processus, les contrats, comment vous communiquez les limites." },
+    { q: "À quoi ressemble la structure de votre équipe — salariés, freelances, offshore ?", hint: "Rôles, mode de recrutement, répartition du travail." },
+    { q: "Quel est votre taux de fidélisation client et que faites-vous pour les garder ?", hint: "Ancienneté moyenne, raisons du churn, stratégies de rétention." },
+    { q: "Quel est le plus grand défi opérationnel ou de croissance que vous rencontrez en ce moment ?", hint: "Talents, acquisition clients, concurrence par les prix, livraison, marges, etc." },
+  ],
+  cleaning: [
+    { q: "Quels types de locaux et de surfaces nettoyez-vous ?", hint: "Bureaux commerciaux, sites industriels, fin de chantier, médical, data centers, etc." },
+    { q: "Comment planifiez-vous et dispatchez-vous vos équipes sur les chantiers ?", hint: "Logiciels, moyens de communication, organisation des équipes, outils de pointage." },
+    { q: "À quoi ressemble votre processus de devis et d'offre commerciale ?", hint: "Visites de site, grille tarifaire, délai de remise, taux de transformation." },
+    { q: "Comment gérez-vous les stocks de produits, produits chimiques et matériels ?", hint: "Commandes, stockage, suivi des consommations, relations fournisseurs." },
+    { q: "Quelles certifications sécurité, réglementaires ou environnementales détenez-vous ?", hint: "Certifications qualité, labels verts, gestion des fiches de données de sécurité, exigences EPI." },
+    { q: "Comment assurez-vous le contrôle qualité et détectez-vous les problèmes avant le client ?", hint: "Inspections, listes de contrôle, validations client, gestion des réclamations." },
+    { q: "Comment est structurée votre main-d'œuvre — salariés ou sous-traitants ?", hint: "Recrutement, formation, turnover, comment vous gérez les problèmes de fiabilité." },
+    { q: "Comment gérez-vous la relation client, les retours et les renouvellements de contrat ?", hint: "Processus de gestion de compte, gestion des escalades, calendrier de renouvellement." },
+    { q: "Quelles sont vos périodes de forte demande et comment vous y préparez-vous ?", hint: "Saisonnalité, nettoyages post-événements, pics de fin d'année." },
+    { q: "Quel est votre plus grand défi opérationnel — ce qui vous tient éveillé la nuit ?", hint: "Fiabilité du personnel, pression sur les prix, matériel, trésorerie, etc." },
+  ],
+  construction: [
+    { q: "Quels types de chantiers prenez-vous et quelle est votre spécialité ?", hint: "Résidentiel, commercial, aménagement intérieur, génie civil, corps d'état spécifiques, maître d'œuvre ou sous-traitant." },
+    { q: "Comment estimez-vous, soumissionnez et remportez-vous des marchés ?", hint: "Processus d'estimation, logiciels utilisés, objectifs de marge, taux de réussite." },
+    { q: "Comment gérez-vous les sous-traitants et les relations fournisseurs ?", hint: "Sélection, contrats, coordination, conditions de paiement, contrôle qualité." },
+    { q: "Quels outils de gestion de chantier et de bureau utilisez-vous ?", hint: "Logiciels de suivi de chantier, journaux de travaux, contrôle documentaire, etc." },
+    { q: "Comment gérez-vous les permis, inspections et la conformité réglementaire ?", hint: "Qui s'en occupe, délais, goulots d'étranglement habituels, juridictions." },
+    { q: "Quel est votre processus de travaux supplémentaires — de l'identification à l'approbation jusqu'à la facturation ?", hint: "Comment vous documentez, chiffrez et obtenez la validation client." },
+    { q: "Comment gérez-vous la sécurité sur vos chantiers ?", hint: "Programme sécurité, causeries sécurité, déclaration d'incidents, exigences assurance." },
+    { q: "À quoi ressemble le calendrier de paiement typique d'un projet ?", hint: "Appels de fonds, facturation à l'avancement, retenues de garantie, problèmes de trésorerie." },
+    { q: "Comment gérez-vous les approvisionnements et les risques de la chaîne d'approvisionnement ?", hint: "Délais de commande, hausse des prix, diversification des fournisseurs." },
+    { q: "Quels sont les risques ou défis les plus importants dans votre carnet de commandes actuel ?", hint: "Pénuries de main-d'œuvre, coûts des matériaux, litiges clients, trésorerie, cautions, etc." },
+  ],
+  restaurants: [
+    { q: "Quel type de cuisine et d'expérience de restauration proposez-vous ?", hint: "Concept, positionnement prix, style de service (restauration rapide, service à table, etc.), capacité d'accueil." },
+    { q: "Comment gérez-vous votre carte — création, tarification et mises à jour saisonnières ?", hint: "Qui la conçoit, fréquence des changements, objectifs de coût matières, marges." },
+    { q: "Comment gérez-vous le personnel — recrutement, formation, planification et turnover ?", hint: "Postes, comment vous trouvez du personnel, processus de formation, causes du turnover." },
+    { q: "Comment maîtrisez-vous les coûts alimentaires et gérez-vous les stocks ?", hint: "Processus de commande, suivi des pertes, relations fournisseurs, % de coût matières cible." },
+    { q: "Quel système de caisse et quelle technologie opérationnelle utilisez-vous ?", hint: "Caisse, réservations, commande en ligne, stocks, paie, affichage cuisine, etc." },
+    { q: "Quels canaux de revenus avez-vous au-delà de la restauration sur place ?", hint: "Applications de livraison, vente à emporter, traiteur, événements, privatisations, etc." },
+    { q: "Comment marketez-vous votre établissement et attirez-vous de nouveaux clients ?", hint: "Réseaux sociaux, Google, email, programmes de fidélité, relations publiques, événements, etc." },
+    { q: "Comment gérez-vous vos périodes de service les plus chargées ?", hint: "Routines de mise en place, renforcement du personnel, gestion des réservations, comment vous évitez les goulots d'étranglement." },
+    { q: "Comment gérez-vous les avis en ligne et la réputation de votre établissement ?", hint: "Comment vous répondez aux avis négatifs, comment vous encouragez les avis positifs." },
+    { q: "Quel est votre principal point de douleur opérationnel en ce moment ?", hint: "Coûts de personnel, coûts alimentaires, marges, commissions de livraison, loyer, acquisition clients, etc." },
+  ],
+  hospitality: [
+    { q: "Quel type d'établissement exploitez-vous et combien d'unités ou d'emplacements avez-vous ?", hint: "Hôtel, auberge de charme, chambre d'hôtes, glamping, camping, auberge de jeunesse, resort — taille et structure." },
+    { q: "Quels canaux de distribution utilisez-vous et comment gérez-vous votre présence en ligne ?", hint: "OTAs (Booking.com, Airbnb, Expedia), réservation directe, logiciel de channel manager." },
+    { q: "Comment gérez-vous la tarification et le taux d'occupation (revenue management) ?", hint: "Tarification dynamique, tarifs saisonniers, durées de séjour minimales, remises, outils utilisés." },
+    { q: "À quoi ressemble le parcours client de la réservation au départ ?", hint: "Confirmation, communication pré-arrivée, check-in, expérience sur place, check-out." },
+    { q: "Comment gérez-vous le ménage, la maintenance et la disponibilité de l'hébergement ?", hint: "Planification, listes de contrôle d'inspection, temps de rotation, logiciels utilisés." },
+    { q: "Quels équipements, activités ou expériences proposez-vous à vos clients ?", hint: "Services sur place, partenariats locaux, forfaits, ce qui vous différencie." },
+    { q: "Comment gérez-vous les réclamations, problèmes et avis en ligne des clients ?", hint: "Processus de résolution, politique de compensation, comment vous répondez aux avis publics." },
+    { q: "Comment acquérez-vous de nouveaux clients et fidélisez-vous la réservation directe ?", hint: "SEO, Google, réseaux sociaux, listes email, programmes de fidélité, partenariats." },
+    { q: "À quoi ressemble votre haute saison et comment vous y préparez-vous ?", hint: "Renforcement du personnel, préparation des stocks, stratégie tarifaire, changements opérationnels." },
+    { q: "Quel est votre plus grand défi pour améliorer l'expérience client ou développer vos revenus ?", hint: "Personnel, dépendance aux OTAs, pouvoir tarifaire, investissement, systèmes, marketing, etc." },
+  ],
+  other: [
+    { q: "Décrivez votre entreprise — dans quel secteur exercez-vous et que proposez-vous ?", hint: "Type d'activité, principaux produits ou services, depuis combien de temps vous exercez." },
+    { q: "Qui est votre client idéal et comment l'atteignez-vous habituellement ?", hint: "Profil client, données démographiques, comment ils vous trouvent, quels canaux fonctionnent." },
+    { q: "À quoi ressemble votre modèle de revenus et comment fixez-vous vos prix ?", hint: "Ponctuel, récurrent, abonnement, projet, commission, etc." },
+    { q: "Décrivez votre flux de travail quotidien — à quoi ressemble concrètement la gestion de votre entreprise ?", hint: "Tâches récurrentes clés, qui fait quoi, comment le travail avance du début à la fin." },
+    { q: "À quoi ressemble la structure de votre équipe ou de vos effectifs ?", hint: "Salariés, contractants, freelances — rôles et organisation du travail." },
+    { q: "Sur quelle technologie et quels outils vous appuyez-vous pour exploiter votre entreprise ?", hint: "Logiciels, plateformes, matériel — ce sans quoi vous ne pourriez pas fonctionner." },
+    { q: "Quels sont vos principaux goulots d'étranglement ou points de douleur opérationnels ?", hint: "Où le travail ralentit, ce qui cause des erreurs, ce qui prend trop de temps." },
+    { q: "Comment acquérez-vous et fidélisez-vous vos clients ?", hint: "Canaux marketing, processus de vente, recommandations, fidélisation, affaires récurrentes." },
+    { q: "Quelles obligations réglementaires, légales ou sectorielles gérez-vous ?", hint: "Licences, certifications, rapports, règles du secteur, etc." },
+    { q: "Qu'est-ce qui ferait la plus grande différence positive pour votre entreprise dans les 12 prochains mois ?", hint: "Objectifs de croissance, problèmes à résoudre, capacités à développer." },
+  ],
+};
+
+let currentIndustry = '';
+let activeRecognition = null;
+let activeRecognitionIndex = null;
+const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!speechSupported) document.getElementById('speech-warn').style.display = 'block';
+  document.getElementById('industry-select').addEventListener('change', onIndustryChange);
+});
+
+function onIndustryChange(e) {
+  const val = e.target.value;
+  if (!val) {
+    currentIndustry = '';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('questions-section').classList.remove('visible');
+    return;
+  }
+  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; activeRecognitionIndex = null; }
+  currentIndustry = val;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('questions-section').classList.add('visible');
+  renderQuestions(val);
+}
+
+function renderQuestions(industry) {
+  const questions = QUESTIONS[industry] || [];
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  document.getElementById('q-count').textContent = `${questions.length} questions`;
+  document.getElementById('export-section').classList.remove('visible');
+
+  questions.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">${i + 1}</div>
+        <div class="q-label">${escHtml(item.q)}</div>
+      </div>
+      ${item.hint ? `<div class="q-hint">${escHtml(item.hint)}</div>` : ''}
+      <div class="q-input-row">
+        <textarea
+          id="answer-${i}"
+          placeholder="Saisissez votre réponse ici ou utilisez le micro…"
+          rows="3"
+          aria-label="Réponse à : ${escHtml(item.q)}"
+          oninput="onAnswerInput()"
+        ></textarea>
+        <button
+          class="mic-btn${speechSupported ? '' : ' unsupported'}"
+          id="mic-${i}"
+          onclick="toggleSpeech(${i})"
+          title="${speechSupported ? 'Cliquez pour dicter votre réponse' : 'Saisie vocale non prise en charge dans ce navigateur'}"
+          aria-label="Enregistrer la réponse"
+          ${speechSupported ? '' : 'disabled'}
+        >
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function toggleSpeech(index) {
+  if (!speechSupported) return;
+  if (activeRecognitionIndex === index && activeRecognition) { activeRecognition.stop(); return; }
+  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'fr-FR';
+
+  const textarea  = document.getElementById(`answer-${index}`);
+  const micBtn    = document.getElementById(`mic-${index}`);
+  const dot       = document.getElementById('status-dot');
+  const statusTxt = document.getElementById('status-text');
+
+  let baseText = textarea.value;
+  if (baseText && !baseText.endsWith(' ')) baseText += ' ';
+
+  recognition.onstart = () => {
+    activeRecognition = recognition;
+    activeRecognitionIndex = index;
+    micBtn.classList.add('recording');
+    dot.className = 'status-dot recording';
+    statusTxt.textContent = `Écoute de la question ${index + 1}… parlez maintenant`;
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) { final += t; } else { interim += t; }
+    }
+    if (final) baseText += final + ' ';
+    textarea.value = baseText + interim;
+    onAnswerInput();
+    textarea.scrollTop = textarea.scrollHeight;
+  };
+
+  recognition.onerror = (e) => {
+    let msg = 'Erreur de reconnaissance vocale';
+    if (e.error === 'not-allowed') msg = 'Accès au microphone refusé — veuillez l\'autoriser dans votre navigateur.';
+    else if (e.error === 'no-speech') msg = 'Aucune parole détectée. Réessayez.';
+    showToast(msg, 'info');
+    stopSpeech(index);
+  };
+
+  recognition.onend = () => { stopSpeech(index); };
+  recognition.start();
+}
+
+function stopSpeech(index) {
+  const micBtn = document.getElementById(`mic-${index}`);
+  if (micBtn) micBtn.classList.remove('recording');
+  document.getElementById('status-dot').className = 'status-dot done';
+  document.getElementById('status-text').textContent = 'Terminé — appuyez sur un autre micro pour continuer, ou saisissez librement.';
+  activeRecognition = null;
+  activeRecognitionIndex = null;
+  onAnswerInput();
+}
+
+function onAnswerInput() { updateProgress(); }
+
+function updateProgress() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  let answered = 0;
+  questions.forEach((_, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    if (ta && ta.value.trim().length > 0) answered++;
+  });
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-label').textContent = `${answered} sur ${questions.length} répondues`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('export-section').classList[answered > 0 ? 'add' : 'remove']('visible');
+}
+
+function buildMarkdown() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  const secteurs = {
+    legal: 'Juridique', accountant: 'Comptabilité & Finance', realestate: 'Immobilier',
+    marketing: 'Agence de marketing', cleaning: 'Nettoyage industriel', construction: 'Construction',
+    restaurants: 'Restauration', hospitality: 'Hôtellerie, Hébergement & Camping', other: 'Autre'
+  };
+  const label = secteurs[currentIndustry] || 'Entreprise';
+  const date  = new Date().toLocaleDateString('fr-FR', { year: 'numeric', month: 'long', day: 'numeric' });
+  let md = `# Bilan de connaissances PME — ${label}\n**Généré le :** ${date}\n\n---\n\n## Aperçu de l'entreprise\n\n**Secteur :** ${label}\n\n---\n\n## Réponses détaillées\n\n`;
+  questions.forEach((item, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    const answer = ta ? ta.value.trim() : '';
+    md += `### ${i + 1}. ${item.q}\n\n${answer || '*(Aucune réponse fournie)*'}\n\n`;
+  });
+  md += `---\n\n*Généré avec l'outil d'extraction de connaissances PME. Collez ce contenu dans Claude ou tout autre outil IA pour créer des documents métier.*\n`;
+  return md;
+}
+
+function copyMarkdown() {
+  const md = buildMarkdown();
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.className = 'btn btn-success';
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copié !`;
+    showToast('Markdown copié dans le presse-papiers', 'success');
+    setTimeout(() => {
+      btn.className = 'btn btn-primary';
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copier en Markdown`;
+    }, 2500);
+  }).catch(() => showToast('Impossible d\'accéder au presse-papiers — essayez le bouton de téléchargement', 'info'));
+}
+
+function downloadMarkdown() {
+  const md = buildMarkdown();
+  const slugs = { legal:'juridique', accountant:'comptabilite', realestate:'immobilier', marketing:'marketing', cleaning:'nettoyage', construction:'construction', restaurants:'restauration', hospitality:'hotellerie', other:'entreprise' };
+  const filename = `bilan-connaissances-pme-${slugs[currentIndustry] || 'entreprise'}-${Date.now()}.md`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Fichier Markdown téléchargé', 'success');
+}
+
+function clearAll() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  const hasContent = questions.some((_, i) => { const ta = document.getElementById(`answer-${i}`); return ta && ta.value.trim().length > 0; });
+  if (!hasContent || confirm('Effacer toutes les réponses pour ce secteur ?')) {
+    questions.forEach((_, i) => { const ta = document.getElementById(`answer-${i}`); if (ta) ta.value = ''; });
+    if (activeRecognition) activeRecognition.stop();
+    updateProgress();
+    showToast('Toutes les réponses ont été effacées', 'info');
+  }
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `show${type ? ' ' + type : ''}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
