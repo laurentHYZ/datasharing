@@ -412,7 +412,7 @@
 
   <div class="status-bar">
     <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">Prêt — appuyez sur un micro pour commencer à parler</span>
+    <span id="status-text">Prêt — cliquez dans un champ et appuyez sur Espace, ou cliquez sur un micro</span>
   </div>
 
   <div id="questions-container"></div>
@@ -597,10 +597,11 @@ function renderQuestions(industry) {
       <div class="q-input-row">
         <textarea
           id="answer-${i}"
-          placeholder="Saisissez votre réponse ici ou utilisez le micro…"
+          placeholder="Saisissez votre réponse, ou appuyez sur Espace / cliquez sur 🎤 pour dicter…"
           rows="3"
           aria-label="Réponse à : ${escHtml(item.q)}"
           oninput="onAnswerInput()"
+          onkeydown="handleSpaceKey(event,${i})"
         ></textarea>
         <button
           class="mic-btn${speechSupported ? '' : ' unsupported'}"
@@ -622,6 +623,14 @@ function renderQuestions(industry) {
     container.appendChild(card);
   });
   updateProgress();
+}
+
+function handleSpaceKey(e, index) {
+  if (!speechSupported) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    toggleSpeech(index);
+  }
 }
 
 function toggleSpeech(index) {
@@ -679,7 +688,7 @@ function stopSpeech(index) {
   const micBtn = document.getElementById(`mic-${index}`);
   if (micBtn) micBtn.classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';
-  document.getElementById('status-text').textContent = 'Terminé — appuyez sur un autre micro pour continuer, ou saisissez librement.';
+  document.getElementById('status-text').textContent = 'Terminé — cliquez dans un autre champ et appuyez sur Espace pour continuer, ou saisissez librement.';
   activeRecognition = null;
   activeRecognitionIndex = null;
   onAnswerInput();

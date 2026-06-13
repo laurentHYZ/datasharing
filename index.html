@@ -490,7 +490,7 @@
 
   <div class="status-bar">
     <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">Ready — tap a microphone to start speaking</span>
+    <span id="status-text">Ready — click a field and press Space, or click a mic button</span>
   </div>
 
   <div id="questions-container"></div>
@@ -679,10 +679,11 @@ function renderQuestions(industry) {
       <div class="q-input-row">
         <textarea
           id="answer-${i}"
-          placeholder="Type your answer here, or use the mic…"
+          placeholder="Type your answer, or press Space / click 🎤 to record…"
           rows="3"
           aria-label="Answer for: ${escHtml(item.q)}"
           oninput="onAnswerInput()"
+          onkeydown="handleSpaceKey(event,${i})"
         ></textarea>
         <button
           class="mic-btn${speechSupported ? '' : ' unsupported'}"
@@ -704,6 +705,14 @@ function renderQuestions(industry) {
     container.appendChild(card);
   });
   updateProgress();
+}
+
+function handleSpaceKey(e, index) {
+  if (!speechSupported) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    toggleSpeech(index);
+  }
 }
 
 function toggleSpeech(index) {
@@ -761,7 +770,7 @@ function stopSpeech(index) {
   const micBtn = document.getElementById(`mic-${index}`);
   if (micBtn) micBtn.classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';
-  document.getElementById('status-text').textContent = 'Done — tap another mic to continue, or type freely.';
+  document.getElementById('status-text').textContent = 'Done — click another field and press Space to continue, or type freely.';
   activeRecognition = null;
   activeRecognitionIndex = null;
   onAnswerInput();
