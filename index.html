@@ -636,6 +636,7 @@ const QUESTIONS = {
 let currentIndustry = '';
 let activeRecognition = null;
 let activeRecognitionIndex = null;
+let recordingActive = false;
 const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -717,56 +718,88 @@ function handleSpaceKey(e, index) {
 
 function toggleSpeech(index) {
   if (!speechSupported) return;
-  if (activeRecognitionIndex === index && activeRecognition) { activeRecognition.stop(); return; }
+
+  // Stop if already recording this question
+  if (activeRecognitionIndex === index && recordingActive) {
+    recordingActive = false;
+    if (activeRecognition) activeRecognition.stop();
+    return;
+  }
+
+  // Stop any other active recording
+  recordingActive = false;
   if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'en-US';
-
-  const textarea = document.getElementById(`answer-${index}`);
-  const micBtn   = document.getElementById(`mic-${index}`);
-  const dot      = document.getElementById('status-dot');
+  const textarea  = document.getElementById(`answer-${index}`);
+  const micBtn    = document.getElementById(`mic-${index}`);
+  const dot       = document.getElementById('status-dot');
   const statusTxt = document.getElementById('status-text');
 
   let baseText = textarea.value;
   if (baseText && !baseText.endsWith(' ')) baseText += ' ';
 
-  recognition.onstart = () => {
-    activeRecognition = recognition;
-    activeRecognitionIndex = index;
-    micBtn.classList.add('recording');
-    dot.className = 'status-dot recording';
-    statusTxt.textContent = `Listening to question ${index + 1}… speak now`;
-  };
+  recordingActive = true;
+  activeRecognitionIndex = index;
 
-  recognition.onresult = (e) => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) { final += t; } else { interim += t; }
-    }
-    if (final) baseText += final + ' ';
-    textarea.value = baseText + interim;
-    onAnswerInput();
-    textarea.scrollTop = textarea.scrollHeight;
-  };
+  function launch() {
+    if (!recordingActive) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    r.continuous = true;
+    r.interimResults = true;
+    r.lang = 'en-US';
 
-  recognition.onerror = (e) => {
-    let msg = 'Speech error';
-    if (e.error === 'not-allowed') msg = 'Microphone access denied — please allow mic in your browser.';
-    else if (e.error === 'no-speech') msg = 'No speech detected. Try again.';
-    showToast(msg, 'info');
-    stopSpeech(index);
-  };
+    // Own counter fixes the Android e.resultIndex reset bug
+    let sessionFinalCount = 0;
 
-  recognition.onend = () => { stopSpeech(index); };
-  recognition.start();
+    r.onstart = () => {
+      activeRecognition = r;
+      micBtn.classList.add('recording');
+      dot.className = 'status-dot recording';
+      statusTxt.textContent = `Listening to question ${index + 1}… speak now`;
+    };
+
+    r.onresult = (e) => {
+      let interim = '';
+      for (let i = sessionFinalCount; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          baseText += e.results[i][0].transcript + ' ';
+          sessionFinalCount++;
+        } else {
+          interim = e.results[i][0].transcript;
+        }
+      }
+      textarea.value = baseText + interim;
+      onAnswerInput();
+      textarea.scrollTop = textarea.scrollHeight;
+    };
+
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        showToast('Microphone access denied — please allow mic in your browser.', 'info');
+        recordingActive = false;
+        stopSpeech(index);
+      }
+      // no-speech / aborted: let onend handle the auto-restart
+    };
+
+    r.onend = () => {
+      if (recordingActive) {
+        // Android stops after pauses even with continuous:true — restart silently
+        setTimeout(launch, 150);
+      } else {
+        stopSpeech(index);
+      }
+    };
+
+    r.start();
+  }
+
+  launch();
 }
 
 function stopSpeech(index) {
+  recordingActive = false;
   const micBtn = document.getElementById(`mic-${index}`);
   if (micBtn) micBtn.classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';

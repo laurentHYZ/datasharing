@@ -556,6 +556,7 @@ const QUESTIONS = {
 let currentIndustry = '';
 let activeRecognition = null;
 let activeRecognitionIndex = null;
+let recordingActive = false;
 const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -635,14 +636,17 @@ function handleSpaceKey(e, index) {
 
 function toggleSpeech(index) {
   if (!speechSupported) return;
-  if (activeRecognitionIndex === index && activeRecognition) { activeRecognition.stop(); return; }
-  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
 
-  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const recognition = new SpeechRecognition();
-  recognition.continuous = true;
-  recognition.interimResults = true;
-  recognition.lang = 'fr-FR';
+  // Stop if already recording this question
+  if (activeRecognitionIndex === index && recordingActive) {
+    recordingActive = false;
+    if (activeRecognition) activeRecognition.stop();
+    return;
+  }
+
+  // Stop any other active recording
+  recordingActive = false;
+  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
 
   const textarea  = document.getElementById(`answer-${index}`);
   const micBtn    = document.getElementById(`mic-${index}`);
@@ -652,39 +656,68 @@ function toggleSpeech(index) {
   let baseText = textarea.value;
   if (baseText && !baseText.endsWith(' ')) baseText += ' ';
 
-  recognition.onstart = () => {
-    activeRecognition = recognition;
-    activeRecognitionIndex = index;
-    micBtn.classList.add('recording');
-    dot.className = 'status-dot recording';
-    statusTxt.textContent = `Écoute de la question ${index + 1}… parlez maintenant`;
-  };
+  recordingActive = true;
+  activeRecognitionIndex = index;
 
-  recognition.onresult = (e) => {
-    let interim = '', final = '';
-    for (let i = e.resultIndex; i < e.results.length; i++) {
-      const t = e.results[i][0].transcript;
-      if (e.results[i].isFinal) { final += t; } else { interim += t; }
-    }
-    if (final) baseText += final + ' ';
-    textarea.value = baseText + interim;
-    onAnswerInput();
-    textarea.scrollTop = textarea.scrollHeight;
-  };
+  function launch() {
+    if (!recordingActive) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    r.continuous = true;
+    r.interimResults = true;
+    r.lang = 'fr-FR';
 
-  recognition.onerror = (e) => {
-    let msg = 'Erreur de reconnaissance vocale';
-    if (e.error === 'not-allowed') msg = 'Accès au microphone refusé — veuillez l\'autoriser dans votre navigateur.';
-    else if (e.error === 'no-speech') msg = 'Aucune parole détectée. Réessayez.';
-    showToast(msg, 'info');
-    stopSpeech(index);
-  };
+    // Own counter fixes the Android e.resultIndex reset bug
+    let sessionFinalCount = 0;
 
-  recognition.onend = () => { stopSpeech(index); };
-  recognition.start();
+    r.onstart = () => {
+      activeRecognition = r;
+      micBtn.classList.add('recording');
+      dot.className = 'status-dot recording';
+      statusTxt.textContent = `Écoute de la question ${index + 1}… parlez maintenant`;
+    };
+
+    r.onresult = (e) => {
+      let interim = '';
+      for (let i = sessionFinalCount; i < e.results.length; i++) {
+        if (e.results[i].isFinal) {
+          baseText += e.results[i][0].transcript + ' ';
+          sessionFinalCount++;
+        } else {
+          interim = e.results[i][0].transcript;
+        }
+      }
+      textarea.value = baseText + interim;
+      onAnswerInput();
+      textarea.scrollTop = textarea.scrollHeight;
+    };
+
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        showToast('Accès au microphone refusé — veuillez l\'autoriser dans votre navigateur.', 'info');
+        recordingActive = false;
+        stopSpeech(index);
+      }
+      // no-speech / aborted: let onend handle the auto-restart
+    };
+
+    r.onend = () => {
+      if (recordingActive) {
+        // Android stops after pauses even with continuous:true — restart silently
+        setTimeout(launch, 150);
+      } else {
+        stopSpeech(index);
+      }
+    };
+
+    r.start();
+  }
+
+  launch();
 }
 
 function stopSpeech(index) {
+  recordingActive = false;
   const micBtn = document.getElementById(`mic-${index}`);
   if (micBtn) micBtn.classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';
