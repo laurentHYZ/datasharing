@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SME Knowledge Dump</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.18);
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --text: #e8eaf6;
+      --text-muted: #8b8fa8;
+      --text-dim: #5a5e78;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 64px;
+    }
+
+    /* ── Header ── */
+    .header {
+      max-width: 780px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #e8eaf6 30%, var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    /* ── Card ── */
+    .card {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* ── Select ── */
+    .select-wrapper {
+      position: relative;
+    }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      padding: 14px 44px 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    select option { background: var(--surface2); color: var(--text); }
+
+    /* ── Intro empty state ── */
+    #empty-state {
+      max-width: 780px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-dim);
+    }
+    #empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    #empty-state p { font-size: 14px; line-height: 1.6; }
+
+    /* ── Questions section ── */
+    #questions-section { display: none; }
+    #questions-section.visible { display: block; }
+
+    .section-header {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .section-header .line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .section-header .count {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+
+    /* ── Question card ── */
+    .question-card {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 20px 16px;
+      transition: border-color 0.2s;
+    }
+    .question-card:focus-within {
+      border-color: rgba(99,102,241,0.4);
+    }
+    .q-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .q-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-hover);
+      margin-top: 1px;
+    }
+    .q-label {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.4;
+      flex: 1;
+    }
+    .q-hint {
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+      padding-left: 34px;
+      line-height: 1.4;
+    }
+    .q-input-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+    }
+    textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 12px 14px;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea::placeholder { color: var(--text-dim); }
+    textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    /* ── Mic button ── */
+    .mic-btn {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      outline: none;
+      position: relative;
+    }
+    .mic-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .mic-btn.recording {
+      border-color: var(--danger);
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      animation: pulse-mic 1.2s ease-in-out infinite;
+    }
+    .mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+    .mic-btn.unsupported:hover { border-color: var(--border); color: var(--text-muted); background: var(--surface2); }
+    @keyframes pulse-mic {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+    .mic-icon { width: 18px; height: 18px; }
+
+    /* ── Status bar ── */
+    .status-bar {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      min-height: 20px;
+    }
+    .status-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      flex-shrink: 0;
+    }
+    .status-dot.recording { background: var(--danger); animation: blink 1s step-start infinite; }
+    .status-dot.done { background: var(--success); }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* ── Progress bar ── */
+    .progress-wrap {
+      max-width: 780px;
+      margin: 0 auto 28px;
+    }
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+    .progress-track {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    /* ── Export section ── */
+    #export-section {
+      max-width: 780px;
+      margin: 32px auto 0;
+      display: none;
+    }
+    #export-section.visible { display: block; }
+    .export-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .export-card h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .export-card p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+    .export-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+    .btn-secondary {
+      background: var(--surface2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-success {
+      background: rgba(34,197,94,0.12);
+      color: var(--success);
+      border: 1px solid rgba(34,197,94,0.3);
+    }
+
+    /* ── Toast ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 100;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: rgba(34,197,94,0.4); color: var(--success); }
+    #toast.info    { border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+
+    /* ── Speech not supported banner ── */
+    .speech-warn {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--warning);
+      display: none;
+    }
+
+    /* ── Mobile ── */
+    @media (max-width: 600px) {
+      body { padding: 16px 10px 56px; }
+      .card, .question-card, .export-card { padding: 16px; }
+      .export-actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <div class="badge">SME Knowledge Tool</div>
+  <h1>Business Knowledge Dump</h1>
+  <p>Answer these questions to create a structured brief about your business. Use the microphone for hands-free input, then export as Markdown for Claude or any AI tool.</p>
+</div>
+
+<!-- Speech not supported warning -->
+<div class="speech-warn" id="speech-warn">
+  Your browser does not support the Web Speech API. Voice input is disabled. Chrome or Edge recommended for speech-to-text.
+</div>
+
+<!-- Industry selector -->
+<div class="card">
+  <div class="card-label">Step 1 — Select Your Industry</div>
+  <div class="select-wrapper">
+    <select id="industry-select" aria-label="Select industry">
+      <option value="">Choose your industry...</option>
+      <option value="legal">Legal</option>
+      <option value="accountant">Accounting &amp; Finance</option>
+      <option value="realestate">Real Estate</option>
+      <option value="marketing">Marketing Agency</option>
+      <option value="cleaning">Industrial Cleaning</option>
+      <option value="construction">Construction</option>
+      <option value="restaurants">Restaurants &amp; Food Service</option>
+      <option value="hospitality">Hospitality, Hotels &amp; Camping</option>
+      <option value="other">Other</option>
+    </select>
+  </div>
+</div>
+
+<!-- Empty state -->
+<div id="empty-state">
+  <div class="icon">🏢</div>
+  <p>Select your industry above to see tailored questions about your business model, workflow, and pain points.</p>
+</div>
+
+<!-- Questions -->
+<div id="questions-section">
+  <div class="section-header">
+    <h2>Your Questions</h2>
+    <div class="line"></div>
+    <div class="count" id="q-count">0 questions</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progress-label">0 of 0 answered</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Ready — tap a microphone to start speaking</span>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <!-- Export section -->
+  <div id="export-section">
+    <div class="export-card">
+      <h3>Export Your Knowledge Brief</h3>
+      <p>Your answers are ready to export as a structured Markdown file — paste it directly into Claude or any AI tool to generate business artifacts, SOPs, or strategy documents.</p>
+      <div class="export-actions">
+        <button class="btn btn-primary" id="copy-btn" onclick="copyMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy as Markdown
+        </button>
+        <button class="btn btn-secondary" id="download-btn" onclick="downloadMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download .md File
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          Clear All
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<script>
+// ── Question bank ──────────────────────────────────────────────────────────
+const QUESTIONS = {
+  legal: [
+    { q: "What areas of law do you specialize in?", hint: "e.g. family law, corporate, criminal, immigration, IP, etc." },
+    { q: "How do clients typically find you and what does your intake process look like?", hint: "From first contact to signed engagement letter." },
+    { q: "What does a typical case or matter lifecycle look like in your practice?", hint: "Stages, milestones, typical duration." },
+    { q: "What billing model do you use and how do you handle invoicing?", hint: "Hourly, flat fee, contingency, retainer — and your billing software." },
+    { q: "How do you manage deadlines, court dates, and tasks across active matters?", hint: "Tools, processes, or systems you rely on." },
+    { q: "What practice management or document management software do you use?", hint: "e.g. Clio, MyCase, NetDocuments, SharePoint, etc." },
+    { q: "What are the most common compliance or ethical obligations that create admin overhead?", hint: "Trust accounting, conflict checks, bar requirements, etc." },
+    { q: "How do you handle client communication and secure document sharing?", hint: "Email, client portals, encrypted messaging, etc." },
+    { q: "What are your biggest time drains that keep you from billable work?", hint: "Admin tasks, chasing documents, client follow-ups, etc." },
+    { q: "What does growth look like for your practice and what's blocking it?", hint: "Hiring, marketing, referrals, niche expansion, etc." },
+  ],
+  accountant: [
+    { q: "What accounting services do you specialize in?", hint: "Tax prep, bookkeeping, audit, CFO advisory, payroll, forensic, etc." },
+    { q: "How do you manage workload spikes during busy seasons?", hint: "Staffing strategies, client scheduling, tech that helps." },
+    { q: "What is your full software stack for client work?", hint: "Tax software, GL/accounting platform, document management, communication tools." },
+    { q: "How do you price and package your services?", hint: "Fixed fees, hourly, value-based, subscription model, etc." },
+    { q: "What does your client onboarding process look like from first call to live work?", hint: "Engagement letters, data collection, setup steps, timeline." },
+    { q: "What are the most common data quality issues you encounter with new clients?", hint: "Messy books, missing records, wrong categorizations, etc." },
+    { q: "How do you stay current with tax law and regulatory changes?", hint: "CPE, subscriptions, professional groups, etc." },
+    { q: "How do you handle client communication and deliverable handoffs?", hint: "Email, portals, review calls, turnaround expectations." },
+    { q: "What compliance or regulatory obligations create the most operational friction?", hint: "Filing deadlines, e-file mandates, state registrations, etc." },
+    { q: "What is your biggest challenge to growing or scaling the practice?", hint: "Staff, automation, client acquisition, pricing power, etc." },
+  ],
+  realestate: [
+    { q: "Do you focus on residential, commercial, or both — and which markets?", hint: "Property types, geographic areas, price ranges." },
+    { q: "How do you generate leads and build your buyer/seller pipeline?", hint: "Referrals, Zillow, social media, sphere of influence, open houses, etc." },
+    { q: "Walk me through your typical transaction from first contact to closing.", hint: "Key stages, timeline, who you coordinate with." },
+    { q: "How do you manage listings — from prep through marketing to offer review?", hint: "Photography, MLS, staging advice, showing coordination, offer management." },
+    { q: "What CRM and transaction management tools do you rely on?", hint: "e.g. Follow Up Boss, Dotloop, DocuSign, ShowingTime, etc." },
+    { q: "What is your commission structure and how do you handle negotiations?", hint: "Standard splits, dual agency situations, your negotiation approach." },
+    { q: "How do you stay in touch with past clients and build repeat/referral business?", hint: "Email campaigns, calls, events, CRM automation, etc." },
+    { q: "How do you handle the administrative side — contracts, compliance, paperwork?", hint: "Who handles it, what tools, what the bottlenecks are." },
+    { q: "What market trends or challenges are most affecting your business right now?", hint: "Interest rates, inventory, buyer sentiment, competition, etc." },
+    { q: "What would make the biggest difference to your productivity or income this year?", hint: "More leads, better systems, a team, niche focus, tech, etc." },
+  ],
+  marketing: [
+    { q: "What specific services does your agency offer?", hint: "SEO, paid media, social, content, email, branding, web design, PR, etc." },
+    { q: "How do you structure client engagements and price your work?", hint: "Monthly retainer, project-based, performance-based, hybrid." },
+    { q: "What does your client onboarding process look like?", hint: "Discovery, strategy, account setup, kickoff, first deliverables timeline." },
+    { q: "How do you report results to clients and manage their expectations?", hint: "Frequency, format, KPIs tracked, tools used for reporting." },
+    { q: "What tools and platforms does your team use day-to-day?", hint: "PM tools, ad platforms, analytics, design tools, CRM, communication, etc." },
+    { q: "How do you manage project timelines, capacity, and team workload?", hint: "What breaks down, what works, how you handle overload." },
+    { q: "How do you handle scope creep and change requests?", hint: "Your process, contracts, how you communicate boundaries." },
+    { q: "What does your team structure look like — employees, freelancers, offshore?", hint: "Roles, how you hire, how work is distributed." },
+    { q: "What is your client retention rate and what do you do to keep clients?", hint: "Average tenure, churn reasons, retention strategies." },
+    { q: "What is the biggest operational or growth challenge you're facing right now?", hint: "Talent, client acquisition, commoditization, delivery, margins, etc." },
+  ],
+  cleaning: [
+    { q: "What types of facilities and surfaces do you clean?", hint: "Commercial offices, industrial plants, post-construction, medical, data centers, etc." },
+    { q: "How do you schedule and dispatch cleaning crews across jobs?", hint: "Software, communication methods, shift structures, GPS or check-in tools." },
+    { q: "What does your bidding and quoting process look like?", hint: "Site visits, pricing formula, turnaround time, win rate." },
+    { q: "How do you manage supplies, chemicals, and equipment inventory?", hint: "Ordering, storage, tracking usage, supplier relationships." },
+    { q: "What safety, compliance, or environmental certifications do you hold?", hint: "OSHA, CIMS, green certifications, SDS management, PPE requirements." },
+    { q: "How do you ensure quality control and catch issues before the client does?", hint: "Inspections, checklists, client sign-offs, complaint handling." },
+    { q: "How is your workforce structured — W2 employees or subcontractors?", hint: "Hiring, training, turnover, how you handle reliability issues." },
+    { q: "How do you handle client communication, feedback, and contract renewals?", hint: "Account management process, escalation handling, renewal timing." },
+    { q: "What are your peak demand periods and how do you prepare for them?", hint: "Seasonal patterns, post-event cleans, year-end pushes." },
+    { q: "What is your biggest operational challenge — what keeps you up at night?", hint: "Staff reliability, pricing pressure, equipment, cash flow, etc." },
+  ],
+  construction: [
+    { q: "What types of projects do you take on and what is your specialty?", hint: "Residential, commercial, fit-out, civil, specific trades, GC vs sub." },
+    { q: "How do you estimate, bid, and win projects?", hint: "Estimation process, software used, margin targets, win rate." },
+    { q: "How do you manage subcontractors and supplier relationships?", hint: "Selection, contracts, coordination, payment terms, quality oversight." },
+    { q: "What project management tools or systems do you use on the job site and in the office?", hint: "Procore, Buildertrend, spreadsheets, daily logs, document control, etc." },
+    { q: "How do you handle permits, inspections, and regulatory compliance?", hint: "Who manages it, timelines, common bottlenecks, jurisdictions." },
+    { q: "What is your change order process — from identification to approval to billing?", hint: "How you document, price, and get client sign-off on changes." },
+    { q: "How do you manage safety on your job sites?", hint: "Safety program, toolbox talks, incident reporting, insurance requirements." },
+    { q: "What does your typical project payment schedule look like?", hint: "Draw schedule, progress billing, retainage, cash flow challenges." },
+    { q: "How do you handle materials procurement and manage supply chain risk?", hint: "Ordering lead times, price escalation, supplier diversification." },
+    { q: "What are the biggest risks or challenges in your current pipeline?", hint: "Labor shortages, material costs, client disputes, cash flow, bonding, etc." },
+  ],
+  restaurants: [
+    { q: "What type of cuisine and dining experience do you offer?", hint: "Concept, price point, service style (fast casual, full service, etc.), seating capacity." },
+    { q: "How do you manage your menu — development, pricing, and seasonal updates?", hint: "Who designs it, how often it changes, food cost targets, margins." },
+    { q: "How do you handle staffing — hiring, training, scheduling, and turnover?", hint: "Roles, how you find staff, training process, what drives turnover." },
+    { q: "How do you control food costs and manage inventory?", hint: "Ordering process, waste tracking, supplier relationships, target food cost %." },
+    { q: "What POS system and operational technology do you use?", hint: "POS, reservations, online ordering, inventory, payroll, kitchen display, etc." },
+    { q: "What revenue channels do you have beyond dine-in?", hint: "Delivery apps, takeout, catering, events, private dining, meal kits, etc." },
+    { q: "How do you market the restaurant and attract new guests?", hint: "Social media, Google, email, loyalty programs, PR, events, etc." },
+    { q: "How do you handle your busiest service periods?", hint: "Prep routines, staffing up, reservation management, how you avoid bottlenecks." },
+    { q: "How do you manage online reviews and your restaurant's reputation?", hint: "How you respond to negative reviews, how you encourage positive ones." },
+    { q: "What is your biggest operational pain point right now?", hint: "Labor costs, food costs, margins, delivery fees, lease, customer acquisition, etc." },
+  ],
+  hospitality: [
+    { q: "What type of property do you operate and how many units or sites do you have?", hint: "Hotel, boutique inn, B&B, glamping, campground, hostel, resort — size and structure." },
+    { q: "What booking channels do you use and how do you manage distribution?", hint: "OTAs (Booking.com, Airbnb, Expedia), direct booking, channel manager software." },
+    { q: "How do you manage pricing and occupancy (revenue management)?", hint: "Dynamic pricing, seasonal rates, minimum stays, discounts, tools you use." },
+    { q: "What does the guest journey look like from booking to checkout?", hint: "Confirmation flow, pre-arrival communication, check-in, on-property experience, checkout." },
+    { q: "How do you manage housekeeping, maintenance, and property readiness?", hint: "Scheduling, inspection checklists, turnover time, software used." },
+    { q: "What amenities, activities, or experiences do you offer guests?", hint: "On-site services, local partnerships, packages, what makes you different." },
+    { q: "How do you handle guest complaints, issues, and online reviews?", hint: "Resolution process, compensation policy, how you respond to public reviews." },
+    { q: "How do you acquire new guests and build direct booking loyalty?", hint: "SEO, Google, social, email lists, loyalty programs, partnerships." },
+    { q: "What does your peak season look like and how do you prepare for it?", hint: "Staffing up, inventory prep, pricing strategy, operational changes." },
+    { q: "What is your biggest challenge to improving guest experience or growing revenue?", hint: "Staffing, OTA dependency, pricing power, capital, systems, marketing, etc." },
+  ],
+  other: [
+    { q: "Describe your business — what industry are you in and what do you sell or provide?", hint: "Type of business, main products or services, how long you've been operating." },
+    { q: "Who is your ideal customer and how do you typically reach them?", hint: "Customer profile, demographics, how they find you, what channels work." },
+    { q: "What does your revenue model look like and how do you price your offerings?", hint: "One-time, recurring, subscription, project-based, commission, etc." },
+    { q: "Describe your day-to-day workflow — what does running the business actually look like?", hint: "Key recurring tasks, who does what, how work flows from start to finish." },
+    { q: "What does your team or staffing structure look like?", hint: "Employees, contractors, freelancers — roles and how work is organized." },
+    { q: "What technology and tools do you rely on to operate the business?", hint: "Software, platforms, hardware — what you couldn't run without." },
+    { q: "What are your biggest operational bottlenecks or pain points?", hint: "Where does work slow down, what causes mistakes, what takes too long." },
+    { q: "How do you acquire and retain customers?", hint: "Marketing channels, sales process, referrals, loyalty, repeat business." },
+    { q: "What compliance, regulatory, or industry-specific requirements do you navigate?", hint: "Licenses, certifications, reporting, industry rules, etc." },
+    { q: "What would make the biggest positive difference to your business in the next 12 months?", hint: "Growth goals, problems to solve, capabilities to build." },
+  ],
+};
+
+// ── State ─────────────────────────────────────────────────────────────────
+let currentIndustry = '';
+let activeRecognition = null;
+let activeRecognitionIndex = null;
+const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+
+// ── Init ──────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  if (!speechSupported) {
+    document.getElementById('speech-warn').style.display = 'block';
+  }
+  document.getElementById('industry-select').addEventListener('change', onIndustryChange);
+});
+
+function onIndustryChange(e) {
+  const val = e.target.value;
+  if (!val) {
+    currentIndustry = '';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('questions-section').classList.remove('visible');
+    return;
+  }
+  if (activeRecognition) {
+    activeRecognition.stop();
+    activeRecognition = null;
+    activeRecognitionIndex = null;
+  }
+  currentIndustry = val;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('questions-section').classList.add('visible');
+  renderQuestions(val);
+}
+
+// ── Render questions ───────────────────────────────────────────────────────
+function renderQuestions(industry) {
+  const questions = QUESTIONS[industry] || [];
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  document.getElementById('q-count').textContent = `${questions.length} questions`;
+  document.getElementById('export-section').classList.remove('visible');
+
+  questions.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">${i + 1}</div>
+        <div class="q-label">${escHtml(item.q)}</div>
+      </div>
+      ${item.hint ? `<div class="q-hint">${escHtml(item.hint)}</div>` : ''}
+      <div class="q-input-row">
+        <textarea
+          id="answer-${i}"
+          placeholder="Type your answer here, or use the mic…"
+          rows="3"
+          aria-label="Answer for: ${escHtml(item.q)}"
+          oninput="onAnswerInput()"
+        ></textarea>
+        <button
+          class="mic-btn${speechSupported ? '' : ' unsupported'}"
+          id="mic-${i}"
+          onclick="toggleSpeech(${i})"
+          title="${speechSupported ? 'Click to speak your answer' : 'Speech input not supported in this browser'}"
+          aria-label="Record answer"
+          ${speechSupported ? '' : 'disabled'}
+        >
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+
+  updateProgress();
+}
+
+// ── Speech-to-text ─────────────────────────────────────────────────────────
+function toggleSpeech(index) {
+  if (!speechSupported) return;
+
+  // Stop if already recording this question
+  if (activeRecognitionIndex === index && activeRecognition) {
+    activeRecognition.stop();
+    return;
+  }
+
+  // Stop any other active recording
+  if (activeRecognition) {
+    activeRecognition.stop();
+    activeRecognition = null;
+  }
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const recognition = new SpeechRecognition();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.lang = 'en-US';
+
+  const textarea = document.getElementById(`answer-${index}`);
+  const micBtn   = document.getElementById(`mic-${index}`);
+  const dot      = document.getElementById('status-dot');
+  const statusTxt = document.getElementById('status-text');
+
+  let baseText = textarea.value;
+  if (baseText && !baseText.endsWith(' ')) baseText += ' ';
+
+  recognition.onstart = () => {
+    activeRecognition = recognition;
+    activeRecognitionIndex = index;
+    micBtn.classList.add('recording');
+    dot.className = 'status-dot recording';
+    statusTxt.textContent = `Listening to question ${index + 1}… speak now`;
+  };
+
+  recognition.onresult = (e) => {
+    let interim = '';
+    let final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      const t = e.results[i][0].transcript;
+      if (e.results[i].isFinal) { final += t; }
+      else { interim += t; }
+    }
+    if (final) baseText += final + ' ';
+    textarea.value = baseText + interim;
+    onAnswerInput();
+    textarea.scrollTop = textarea.scrollHeight;
+  };
+
+  recognition.onerror = (e) => {
+    let msg = 'Speech error';
+    if (e.error === 'not-allowed') msg = 'Microphone access denied — please allow mic in your browser.';
+    else if (e.error === 'no-speech') msg = 'No speech detected. Try again.';
+    showToast(msg, 'info');
+    stopSpeech(index);
+  };
+
+  recognition.onend = () => {
+    stopSpeech(index);
+  };
+
+  recognition.start();
+}
+
+function stopSpeech(index) {
+  const micBtn = document.getElementById(`mic-${index}`);
+  if (micBtn) micBtn.classList.remove('recording');
+  document.getElementById('status-dot').className = 'status-dot done';
+  document.getElementById('status-text').textContent = 'Done — tap another mic to continue, or type freely.';
+  activeRecognition = null;
+  activeRecognitionIndex = null;
+  onAnswerInput();
+}
+
+// ── Progress ───────────────────────────────────────────────────────────────
+function onAnswerInput() {
+  updateProgress();
+}
+
+function updateProgress() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  let answered = 0;
+  questions.forEach((_, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    if (ta && ta.value.trim().length > 0) answered++;
+  });
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-label').textContent = `${answered} of ${questions.length} answered`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+
+  const exportEl = document.getElementById('export-section');
+  if (answered > 0) {
+    exportEl.classList.add('visible');
+  } else {
+    exportEl.classList.remove('visible');
+  }
+}
+
+// ── Markdown export ────────────────────────────────────────────────────────
+function buildMarkdown() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  const industryLabels = {
+    legal: 'Legal', accountant: 'Accounting & Finance', realestate: 'Real Estate',
+    marketing: 'Marketing Agency', cleaning: 'Industrial Cleaning', construction: 'Construction',
+    restaurants: 'Restaurants & Food Service', hospitality: 'Hospitality, Hotels & Camping', other: 'Other'
+  };
+  const label = industryLabels[currentIndustry] || 'Business';
+  const date  = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  let md = `# SME Knowledge Brief — ${label}\n`;
+  md += `**Generated:** ${date}\n\n`;
+  md += `---\n\n`;
+  md += `## Business Overview\n\n`;
+  md += `**Industry:** ${label}\n\n`;
+  md += `---\n\n`;
+  md += `## Detailed Responses\n\n`;
+
+  questions.forEach((item, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    const answer = ta ? ta.value.trim() : '';
+    md += `### ${i + 1}. ${item.q}\n\n`;
+    if (answer) {
+      md += `${answer}\n\n`;
+    } else {
+      md += `*(No answer provided)*\n\n`;
+    }
+  });
+
+  md += `---\n\n`;
+  md += `*Generated with the SME Knowledge Dump tool. Paste into Claude or any AI tool to build business artifacts.*\n`;
+  return md;
+}
+
+function copyMarkdown() {
+  const md = buildMarkdown();
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.className = 'btn btn-success';
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    showToast('Markdown copied to clipboard', 'success');
+    setTimeout(() => {
+      btn.className = 'btn btn-primary';
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy as Markdown`;
+    }, 2500);
+  }).catch(() => {
+    showToast('Could not access clipboard — try the download button', 'info');
+  });
+}
+
+function downloadMarkdown() {
+  const md = buildMarkdown();
+  const industryLabels = {
+    legal: 'legal', accountant: 'accounting', realestate: 'real-estate',
+    marketing: 'marketing', cleaning: 'cleaning', construction: 'construction',
+    restaurants: 'restaurants', hospitality: 'hospitality', other: 'business'
+  };
+  const slug = industryLabels[currentIndustry] || 'business';
+  const filename = `sme-knowledge-brief-${slug}-${Date.now()}.md`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('Markdown file downloaded', 'success');
+}
+
+function clearAll() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  const hasContent = questions.some((_, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    return ta && ta.value.trim().length > 0;
+  });
+  if (!hasContent || confirm('Clear all answers for this industry?')) {
+    questions.forEach((_, i) => {
+      const ta = document.getElementById(`answer-${i}`);
+      if (ta) ta.value = '';
+    });
+    if (activeRecognition) { activeRecognition.stop(); }
+    updateProgress();
+    showToast('All answers cleared', 'info');
+  }
+}
+
+// ── Toast ──────────────────────────────────────────────────────────────────
+let toastTimer;
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `show${type ? ' ' + type : ''}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
+}
+
+// ── Util ───────────────────────────────────────────────────────────────────
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
