@@ -603,6 +603,7 @@ function renderQuestions(industry) {
           aria-label="Réponse à : ${escHtml(item.q)}"
           oninput="onAnswerInput()"
           onkeydown="handleSpaceKey(event,${i})"
+          onfocus="onTextareaFocus(${i})"
         ></textarea>
         <button
           class="mic-btn${speechSupported ? '' : ' unsupported'}"
@@ -624,6 +625,19 @@ function renderQuestions(industry) {
     container.appendChild(card);
   });
   updateProgress();
+}
+
+function onTextareaFocus(index) {
+  if (recordingActive && activeRecognitionIndex !== index) {
+    recordingActive = false;
+    if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} }
+    const prevMic = document.getElementById(`mic-${activeRecognitionIndex}`);
+    if (prevMic) prevMic.classList.remove('recording');
+    activeRecognition = null;
+    activeRecognitionIndex = null;
+    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('status-text').textContent = 'Enregistrement arrêté — appuyez sur Espace ou cliquez sur le micro pour dicter ici.';
+  }
 }
 
 function handleSpaceKey(e, index) {
