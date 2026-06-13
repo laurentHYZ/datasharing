@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Extraction de connaissances PME</title>
+  <title>Extraction de connaissances PME · v3</title>
   <style>
     :root {
       --bg: #0f1117;
@@ -361,7 +361,7 @@
 </div>
 
 <div class="header">
-  <div class="badge">Outil de connaissance PME</div>
+  <div class="badge">Outil de connaissance PME &nbsp;·&nbsp; <span style="color:#22c55e">v3</span></div>
   <h1>Extraction de connaissances métier</h1>
   <p>Répondez à ces questions pour créer un bilan structuré de votre entreprise. Utilisez le micro pour dicter vos réponses, puis exportez en Markdown pour Claude ou tout autre outil IA.</p>
 </div>
@@ -640,13 +640,13 @@ function toggleSpeech(index) {
   // Stop if already recording this question
   if (activeRecognitionIndex === index && recordingActive) {
     recordingActive = false;
-    if (activeRecognition) activeRecognition.stop();
+    if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} }
     return;
   }
 
   // Stop any other active recording
   recordingActive = false;
-  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; }
+  if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} activeRecognition = null; }
 
   const textarea  = document.getElementById(`answer-${index}`);
   const micBtn    = document.getElementById(`mic-${index}`);
@@ -663,12 +663,12 @@ function toggleSpeech(index) {
     if (!recordingActive) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const r = new SR();
-    r.continuous = true;
+    // continuous:false = one utterance per session, no cumulative results array.
+    // Eliminates the Android bug where the array is replayed from the start.
+    // Manual restart in onend keeps recording going across pauses.
+    r.continuous = false;
     r.interimResults = true;
     r.lang = 'fr-FR';
-
-    // Own counter fixes the Android e.resultIndex reset bug
-    let sessionFinalCount = 0;
 
     r.onstart = () => {
       activeRecognition = r;
@@ -678,16 +678,15 @@ function toggleSpeech(index) {
     };
 
     r.onresult = (e) => {
-      let interim = '';
-      for (let i = sessionFinalCount; i < e.results.length; i++) {
-        if (e.results[i].isFinal) {
-          baseText += e.results[i][0].transcript + ' ';
-          sessionFinalCount++;
-        } else {
-          interim = e.results[i][0].transcript;
-        }
+      // With continuous:false, e.results[0] is always THIS utterance only — no accumulation.
+      if (!e.results || e.results.length === 0) return;
+      const res = e.results[0];
+      if (res.isFinal) {
+        baseText += res[0].transcript + ' ';
+        textarea.value = baseText;
+      } else {
+        textarea.value = baseText + res[0].transcript;
       }
-      textarea.value = baseText + interim;
       onAnswerInput();
       textarea.scrollTop = textarea.scrollHeight;
     };
@@ -698,19 +697,20 @@ function toggleSpeech(index) {
         recordingActive = false;
         stopSpeech(index);
       }
-      // no-speech / aborted: let onend handle the auto-restart
+      // no-speech / aborted / network: onend fires next, restart handles it
     };
 
     r.onend = () => {
+      activeRecognition = null;
       if (recordingActive) {
-        // Android stops after pauses even with continuous:true — restart silently
-        setTimeout(launch, 150);
+        setTimeout(launch, 200); // restart for next utterance
       } else {
         stopSpeech(index);
       }
     };
 
-    r.start();
+    try { r.start(); }
+    catch(err) { if (recordingActive) setTimeout(launch, 400); }
   }
 
   launch();
