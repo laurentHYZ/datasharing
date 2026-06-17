@@ -1,0 +1,826 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>中小企业知识提取 · v4</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-glow: rgba(99, 102, 241, 0.18);
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --text: #e8eaf6;
+      --text-muted: #8b8fa8;
+      --text-dim: #5a5e78;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 64px;
+    }
+
+    .header {
+      max-width: 780px;
+      margin: 0 auto 40px;
+      text-align: center;
+    }
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: clamp(24px, 5vw, 38px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #e8eaf6 30%, var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      line-height: 1.6;
+      max-width: 540px;
+      margin: 0 auto;
+    }
+
+    .lang-switcher {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+    .lang-btn {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      text-decoration: none;
+      transition: all 0.2s;
+    }
+    .lang-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .lang-btn.active { background: var(--accent-glow); border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+
+    .card {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      box-shadow: var(--shadow);
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .select-wrapper { position: relative; }
+    .select-wrapper::after {
+      content: '▾';
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted);
+      pointer-events: none;
+      font-size: 14px;
+    }
+    select {
+      width: 100%;
+      appearance: none;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 15px;
+      padding: 14px 44px 14px 16px;
+      cursor: pointer;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      outline: none;
+    }
+    select:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+    select option { background: var(--surface2); color: var(--text); }
+
+    #empty-state {
+      max-width: 780px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-dim);
+    }
+    #empty-state .icon { font-size: 48px; margin-bottom: 16px; }
+    #empty-state p { font-size: 14px; line-height: 1.6; }
+
+    #questions-section { display: none; }
+    #questions-section.visible { display: block; }
+
+    .section-header {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .section-header h2 {
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .section-header .line { flex: 1; height: 1px; background: var(--border); }
+    .section-header .count {
+      font-size: 11px;
+      color: var(--text-dim);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2px 8px;
+    }
+
+    .question-card {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px 20px 16px;
+      transition: border-color 0.2s;
+    }
+    .question-card:focus-within { border-color: rgba(99,102,241,0.4); }
+    .q-header { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
+    .q-num {
+      flex-shrink: 0;
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-hover);
+      margin-top: 1px;
+    }
+    .q-label { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; flex: 1; }
+    .q-hint { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; padding-left: 34px; line-height: 1.4; }
+    .q-input-row { display: flex; gap: 8px; align-items: flex-start; }
+
+    textarea {
+      flex: 1;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 12px 14px;
+      resize: vertical;
+      min-height: 90px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea::placeholder { color: var(--text-dim); }
+    textarea:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .mic-btn {
+      flex-shrink: 0;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .mic-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .mic-btn.recording {
+      border-color: var(--danger);
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      animation: pulse-mic 1.2s ease-in-out infinite;
+    }
+    .mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+    .mic-btn.unsupported:hover { border-color: var(--border); color: var(--text-muted); background: var(--surface2); }
+    @keyframes pulse-mic {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50%       { box-shadow: 0 0 0 6px rgba(239,68,68,0); }
+    }
+    .mic-icon { width: 18px; height: 18px; }
+
+    .status-bar {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      min-height: 20px;
+    }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--text-dim); flex-shrink: 0; }
+    .status-dot.recording { background: var(--danger); animation: blink 1s step-start infinite; }
+    .status-dot.done { background: var(--success); }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    .progress-wrap { max-width: 780px; margin: 0 auto 28px; }
+    .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--text-dim); margin-bottom: 6px; }
+    .progress-track { height: 4px; background: var(--surface2); border-radius: 4px; overflow: hidden; }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent), var(--accent-hover));
+      border-radius: 4px;
+      transition: width 0.4s ease;
+      width: 0%;
+    }
+
+    #export-section { max-width: 780px; margin: 32px auto 0; display: none; }
+    #export-section.visible { display: block; }
+    .export-card {
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .export-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .export-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 20px; line-height: 1.5; }
+    .export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 11px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-success { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 100;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: rgba(34,197,94,0.4); color: var(--success); }
+    #toast.info    { border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+
+    .speech-warn {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--warning);
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 16px 10px 56px; }
+      .card, .question-card, .export-card { padding: 16px; }
+      .export-actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="lang-switcher">
+  <a class="lang-btn" href="index.html">🇬🇧 English</a>
+  <a class="lang-btn" href="fr.html">🇫🇷 Français</a>
+  <span class="lang-btn active">🇨🇳 中文</span>
+</div>
+
+<div class="header">
+  <div class="badge">中小企业知识工具 &nbsp;·&nbsp; <span style="color:#22c55e">v4</span></div>
+  <h1>业务知识提取</h1>
+  <p>回答以下问题，为您的企业创建结构化知识档案。使用麦克风口述回答，然后导出为 Markdown 格式，粘贴到 Claude 或其他 AI 工具中生成业务文档、流程或策略。</p>
+</div>
+
+<div class="speech-warn" id="speech-warn">
+  您的浏览器不支持 Web Speech API，语音输入功能已禁用。建议使用 Chrome 或 Edge 浏览器以启用语音识别。
+</div>
+
+<div class="card">
+  <div class="card-label">第一步 — 选择您的行业</div>
+  <div class="select-wrapper">
+    <select id="industry-select" aria-label="选择您的行业">
+      <option value="">请选择您的行业...</option>
+      <option value="legal">法律</option>
+      <option value="accountant">会计与财务</option>
+      <option value="realestate">房地产</option>
+      <option value="marketing">营销机构</option>
+      <option value="cleaning">工业清洁</option>
+      <option value="construction">建筑施工</option>
+      <option value="restaurants">餐饮</option>
+      <option value="hospitality">酒店、住宿与露营</option>
+      <option value="other">其他</option>
+    </select>
+  </div>
+</div>
+
+<div id="empty-state">
+  <div class="icon">🏢</div>
+  <p>请在上方选择您的行业，查看针对您的商业模式、挑战和工作流程量身定制的问题。</p>
+</div>
+
+<div id="questions-section">
+  <div class="section-header">
+    <h2>您的问题</h2>
+    <div class="line"></div>
+    <div class="count" id="q-count">0 道题</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="progress-label">已回答 0 / 0 道题</span>
+      <span id="progress-pct">0%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">就绪 — 点击输入框后按空格键，或点击麦克风图标开始录音</span>
+  </div>
+
+  <div id="questions-container"></div>
+
+  <div id="export-section">
+    <div class="export-card">
+      <h3>导出您的知识档案</h3>
+      <p>您的回答已准备好导出为结构化 Markdown 文件——直接粘贴到 Claude 或其他 AI 工具中，即可生成业务文档、操作流程或发展策略。</p>
+      <div class="export-actions">
+        <button class="btn btn-primary" id="copy-btn" onclick="copyMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          复制为 Markdown
+        </button>
+        <button class="btn btn-secondary" id="download-btn" onclick="downloadMarkdown()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          下载 .md 文件
+        </button>
+        <button class="btn btn-secondary" onclick="clearAll()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+          清除所有回答
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const QUESTIONS = {
+  legal: [
+    { q: "您专注于哪些法律领域？", hint: "如家庭法、公司法、刑法、移民、知识产权等" },
+    { q: "客户如何找到您，您的接案流程是怎样的？", hint: "从首次接触到签署委托协议的全过程" },
+    { q: "贵所典型案件的处理周期是怎样的？", hint: "阶段、里程碑、通常时长" },
+    { q: "您采用哪种收费模式，如何管理费用？", hint: "小时收费、固定收费、风险代理、预付款——以及使用的账单软件" },
+    { q: "如何跨所有活跃案件管理截止日期、庭期和任务？", hint: "您依赖的工具、流程或系统" },
+    { q: "您使用哪种案件管理或文档管理软件？", hint: "如 Clio、MyCase、NetDocuments、SharePoint 等" },
+    { q: "哪些职业道德或合规义务产生最多行政负担？", hint: "信托账户核算、利益冲突审查、律师协会要求等" },
+    { q: "如何管理客户沟通和安全文件共享？", hint: "电子邮件、客户门户、加密通讯等" },
+    { q: "什么事务占用最多时间，妨碍您处理计费工作？", hint: "行政任务、催要文件、跟进客户等" },
+    { q: "事务所的增长目标是什么，有哪些障碍？", hint: "招聘、市场营销、转介绍、专业化等" },
+  ],
+  accountant: [
+    { q: "您专注于哪些会计服务？", hint: "税务申报、记账、审计、财务顾问、薪资管理、司法会计等" },
+    { q: "您如何管理旺季的工作量高峰？", hint: "人员策略、客户档期安排、辅助工具" },
+    { q: "您为客户提供服务时使用哪些完整的软件工具链？", hint: "税务软件、会计平台、文档管理、沟通工具" },
+    { q: "您如何确定和构建收费标准？", hint: "固定费用、小时收费、价值定价、订阅制等" },
+    { q: "从初次通话到开始服务，客户入驻流程是怎样的？", hint: "委托协议、数据收集、入驻步骤、时间节点" },
+    { q: "新客户最常见的数据质量问题是什么？", hint: "账目混乱、凭证缺失、错误分类等" },
+    { q: "您如何跟上税法和监管变化？", hint: "继续教育、资讯订阅、行业团体等" },
+    { q: "如何管理客户沟通和成果交付？", hint: "电子邮件、门户平台、审阅会议、预期响应时间" },
+    { q: "哪些合规义务在运营上产生最大摩擦？", hint: "申报截止日期、电子申报要求、地方注册等" },
+    { q: "发展或扩张事务所的最大挑战是什么？", hint: "人员配置、自动化、客户获取、定价权等" },
+  ],
+  realestate: [
+    { q: "您专注于住宅、商业还是两者兼顾——主要服务哪些市场？", hint: "物业类型、地理区域、价格区间" },
+    { q: "您如何开发客户资源并建立买卖双方的业务渠道？", hint: "转介绍、房产平台、社交媒体、社区关系、开放参观等" },
+    { q: "描述从首次接触到交割过户的典型交易流程。", hint: "关键步骤、时间节点、涉及各方" },
+    { q: "如何管理房源——从准备、上架到收到报价？", hint: "拍照、平台发布、装修建议、看房安排、报价管理" },
+    { q: "您使用哪些 CRM 和交易管理工具？", hint: "CRM 软件、电子签名平台、看房追踪工具等" },
+    { q: "您的佣金结构是怎样的，如何处理价格谈判？", hint: "通常的分成比例、双边代理情况、您的谈判方式" },
+    { q: "如何与前客户保持联系以促进回头客和转介绍？", hint: "电子邮件营销、电话、活动、CRM 自动化等" },
+    { q: "如何处理行政工作——合同、合规、文书手续？", hint: "谁来处理、使用什么工具、有哪些瓶颈" },
+    { q: "目前哪些市场趋势或挑战对您的业务影响最大？", hint: "利率、房源数量、买家情绪、竞争等" },
+    { q: "今年什么改变对您的生产力或收入提升最大？", hint: "更多客户资源、更好的系统、团队建设、专业化、技术等" },
+  ],
+  marketing: [
+    { q: "贵机构具体提供哪些服务？", hint: "SEO、付费广告、社交媒体、内容营销、电子邮件、品牌、建站、公关等" },
+    { q: "如何构建客户项目并设定收费标准？", hint: "月度服务费、单次项目、绩效导向、混合模式" },
+    { q: "客户入驻流程是怎样的？", hint: "需求发现、策略制定、账户设置、项目启动、首批交付物时间节点" },
+    { q: "如何向客户汇报成果并管理其预期？", hint: "汇报频率、格式、追踪的 KPI、使用的报告工具" },
+    { q: "您的团队日常使用哪些工具和平台？", hint: "项目管理、广告平台、数据分析、设计、CRM、沟通工具等" },
+    { q: "如何管理截止日期、产能和团队工作量？", hint: "哪些地方容易出问题、哪些运转良好、如何处理超负荷" },
+    { q: "如何处理工作范围蔓延和变更请求？", hint: "您的处理流程、合同条款、如何与客户沟通边界" },
+    { q: "团队结构是怎样的——正式员工、自由职业者还是海外外包？", hint: "岗位设置、招聘方式、工作分配" },
+    { q: "客户留存率如何，做了哪些工作来留住客户？", hint: "平均合作年限、流失原因、留存策略" },
+    { q: "目前最大的运营或增长挑战是什么？", hint: "人才、客户获取、价格竞争、交付质量、利润率等" },
+  ],
+  cleaning: [
+    { q: "您清洁哪些类型的场所和表面？", hint: "商业办公楼、工业场所、施工后清洁、医疗机构、数据中心等" },
+    { q: "如何安排和调度团队到各个场所？", hint: "使用的软件、通讯方式、团队组织、打卡工具" },
+    { q: "您的报价和销售流程是怎样的？", hint: "现场勘查、定价标准、报价周期、成交率" },
+    { q: "如何管理清洁用品、化学品和设备库存？", hint: "采购、存储、用量追踪、供应商关系" },
+    { q: "您持有哪些安全、监管或环保认证？", hint: "质量认证、绿色标志、安全数据表管理、防护装备要求" },
+    { q: "如何确保质量控制并在客户投诉前发现问题？", hint: "巡检、核查表、客户验收、投诉处理流程" },
+    { q: "您的劳动力结构如何——直接雇员还是分包商？", hint: "招聘、培训、人员流动率、如何解决可靠性问题" },
+    { q: "如何管理客户关系、收集反馈和推进合同续签？", hint: "账户管理流程、升级处理机制、续签时间表" },
+    { q: "您的业务旺季是什么时候，如何为此做准备？", hint: "季节性规律、活动后清洁、年末高峰期" },
+    { q: "最大的运营挑战是什么——让您最担心的是什么？", hint: "人员可靠性、价格压力、设备、现金流等" },
+  ],
+  construction: [
+    { q: "您承接哪些类型的项目，专业领域是什么？", hint: "住宅、商业、室内装修、土木工程、专项工程——总承包还是分包" },
+    { q: "如何进行估算、投标并赢得合同？", hint: "估算流程、使用软件、利润目标、中标率" },
+    { q: "如何管理分包商和供应商关系？", hint: "资质筛选、合同管理、现场协调、付款条件、质量控制" },
+    { q: "您使用哪些施工现场和办公管理工具？", hint: "项目追踪软件、施工日志、文档管控等" },
+    { q: "如何处理施工许可、竣工验收和合规要求？", hint: "谁来跟进、时间节点、常见瓶颈、涉及地区" },
+    { q: "工程变更单的处理流程是怎样的——从识别到审批再到开票？", hint: "如何记录、定价并获得业主确认" },
+    { q: "如何管理施工现场安全？", hint: "安全管理计划、安全交底、事故报告、保险要求" },
+    { q: "典型项目的付款时间表是怎样的？", hint: "进度款、按里程碑开票、质保金扣留、现金流压力" },
+    { q: "如何管理采购和供应链风险？", hint: "采购提前期、价格上涨、供应商多元化" },
+    { q: "当前在手项目中最大的风险或挑战是什么？", hint: "劳动力短缺、材料成本、客户纠纷、资金、履约保证金等" },
+  ],
+  restaurants: [
+    { q: "您提供什么类型的餐饮和就餐体验？", hint: "餐厅定位、价格档次、服务方式（快餐、正餐等）、座位容量" },
+    { q: "如何管理菜单——菜品设计、定价和季节性更新？", hint: "由谁设计、更新频率、食材成本目标、毛利率" },
+    { q: "如何管理员工——招聘、培训、排班和人员流动？", hint: "岗位设置、招聘渠道、培训流程、人员流失原因" },
+    { q: "如何控制食材成本和管理库存？", hint: "采购流程、损耗追踪、供应商关系、目标食材成本率" },
+    { q: "您使用哪些收银系统和运营技术？", hint: "POS 系统、预订平台、线上点餐、库存管理、薪资、厨显等" },
+    { q: "除堂食外还有哪些营收渠道？", hint: "外卖平台、外带、上门配送、宴会外烩、活动包场等" },
+    { q: "如何营销餐厅并吸引新客？", hint: "社交媒体、谷歌/大众点评、电子邮件、会员计划、公关、活动等" },
+    { q: "如何管理最繁忙的服务时段？", hint: "备餐流程、人员配备、预订管理、避免服务瓶颈的方法" },
+    { q: "如何管理线上评论和餐厅口碑？", hint: "如何回应差评、如何引导好评" },
+    { q: "目前最主要的运营痛点是什么？", hint: "人力成本、食材成本、利润率、外卖平台佣金、租金、客源等" },
+  ],
+  hospitality: [
+    { q: "您经营什么类型的住宿，有多少套房/床位/场地？", hint: "酒店、精品民宿、农家乐、豪华露营、露营地、青旅、度假村——规模与结构" },
+    { q: "您使用哪些分销渠道，如何管理线上业务？", hint: "OTA（Booking.com、Airbnb、Expedia）、直接预订、渠道管理软件" },
+    { q: "如何管理定价和入住率（收益管理）？", hint: "动态定价、季节性价格、最短住宿要求、优惠折扣、使用工具" },
+    { q: "从预订到退房，客户旅程是怎样的？", hint: "预订确认、到达前沟通、入住办理、在住体验、退房手续" },
+    { q: "如何管理客房清洁、设施维护和房态更新？", hint: "排班安排、房间检查核查表、翻房时间、使用软件" },
+    { q: "您为住客提供哪些设施、活动或特色体验？", hint: "场内服务、本地合作伙伴、套餐产品、差异化亮点" },
+    { q: "如何处理客诉、问题和线上评价？", hint: "问题解决流程、补偿政策、如何回应公开评价" },
+    { q: "如何吸引新客并提升直接预订比例？", hint: "SEO、谷歌、社交媒体、邮件营销、会员计划、合作伙伴" },
+    { q: "旺季是什么时候，如何为此提前备战？", hint: "人员招募、物资备货、定价策略、运营调整" },
+    { q: "提升客户体验或增加营收的最大挑战是什么？", hint: "人员配置、OTA 依赖度、定价能力、资本投入、系统、营销等" },
+  ],
+  other: [
+    { q: "描述您的企业——所在行业及提供的产品或服务。", hint: "业务类型、主要产品或服务、经营年限" },
+    { q: "您的理想客户是谁，通常如何接触到他们？", hint: "客户画像、人口特征、如何找到您、哪些渠道有效" },
+    { q: "您的营收模式是怎样的，如何进行定价？", hint: "一次性收费、周期性、订阅制、项目制、佣金制等" },
+    { q: "描述日常工作流程——实际经营企业是什么样的？", hint: "关键的重复性任务、谁做什么、工作如何从头到尾推进" },
+    { q: "团队或人力结构是怎样的？", hint: "正式员工、合同工、自由职业者——岗位设置和工作安排" },
+    { q: "运营企业依赖哪些技术和工具？", hint: "软件、平台、硬件——缺少它们就无法正常运转的关键工具" },
+    { q: "主要的运营瓶颈或痛点是什么？", hint: "工作在哪里卡顿、什么导致失误、什么占用时间过多" },
+    { q: "如何获取和留住客户？", hint: "营销渠道、销售流程、转介绍、留存机制、复购" },
+    { q: "需要处理哪些监管、法律或行业合规要求？", hint: "许可证、认证、报告义务、行业规则等" },
+    { q: "未来 12 个月内，什么变化对您的企业影响最大？", hint: "增长目标、需要解决的问题、需要建立的能力" },
+  ],
+};
+
+let currentIndustry = '';
+let activeRecognition = null;
+let activeRecognitionIndex = null;
+let recordingActive = false;
+const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+
+document.addEventListener('DOMContentLoaded', () => {
+  if (!speechSupported) document.getElementById('speech-warn').style.display = 'block';
+  document.getElementById('industry-select').addEventListener('change', onIndustryChange);
+});
+
+function onIndustryChange(e) {
+  const val = e.target.value;
+  if (!val) {
+    currentIndustry = '';
+    document.getElementById('empty-state').style.display = 'block';
+    document.getElementById('questions-section').classList.remove('visible');
+    return;
+  }
+  if (activeRecognition) { activeRecognition.stop(); activeRecognition = null; activeRecognitionIndex = null; }
+  currentIndustry = val;
+  document.getElementById('empty-state').style.display = 'none';
+  document.getElementById('questions-section').classList.add('visible');
+  renderQuestions(val);
+}
+
+function renderQuestions(industry) {
+  const questions = QUESTIONS[industry] || [];
+  const container = document.getElementById('questions-container');
+  container.innerHTML = '';
+  document.getElementById('q-count').textContent = `${questions.length} 道题`;
+  document.getElementById('export-section').classList.remove('visible');
+
+  questions.forEach((item, i) => {
+    const card = document.createElement('div');
+    card.className = 'question-card';
+    card.innerHTML = `
+      <div class="q-header">
+        <div class="q-num">${i + 1}</div>
+        <div class="q-label">${escHtml(item.q)}</div>
+      </div>
+      ${item.hint ? `<div class="q-hint">${escHtml(item.hint)}</div>` : ''}
+      <div class="q-input-row">
+        <textarea
+          id="answer-${i}"
+          placeholder="输入您的回答，或按空格键 / 点击 🎤 进行语音输入…"
+          rows="3"
+          aria-label="回答：${escHtml(item.q)}"
+          oninput="onAnswerInput()"
+          onkeydown="handleSpaceKey(event,${i})"
+          onfocus="onTextareaFocus(${i})"
+        ></textarea>
+        <button
+          class="mic-btn${speechSupported ? '' : ' unsupported'}"
+          id="mic-${i}"
+          onclick="toggleSpeech(${i})"
+          title="${speechSupported ? '点击以语音输入回答' : '此浏览器不支持语音输入'}"
+          aria-label="录音回答"
+          ${speechSupported ? '' : 'disabled'}
+        >
+          <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+            <line x1="12" y1="19" x2="12" y2="23"/>
+            <line x1="8" y1="23" x2="16" y2="23"/>
+          </svg>
+        </button>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+  updateProgress();
+}
+
+function onTextareaFocus(index) {
+  if (recordingActive && activeRecognitionIndex !== index) {
+    recordingActive = false;
+    if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} }
+    const prevMic = document.getElementById(`mic-${activeRecognitionIndex}`);
+    if (prevMic) prevMic.classList.remove('recording');
+    activeRecognition = null;
+    activeRecognitionIndex = null;
+    document.getElementById('status-dot').className = 'status-dot';
+    document.getElementById('status-text').textContent = '录音已停止 — 按空格键或点击麦克风图标在此处继续录音。';
+  }
+}
+
+function handleSpaceKey(e, index) {
+  if (!speechSupported) return;
+  if (e.code === 'Space') {
+    e.preventDefault();
+    toggleSpeech(index);
+  }
+}
+
+function toggleSpeech(index) {
+  if (!speechSupported) return;
+
+  if (activeRecognitionIndex === index && recordingActive) {
+    recordingActive = false;
+    if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} }
+    return;
+  }
+
+  recordingActive = false;
+  if (activeRecognition) { try { activeRecognition.stop(); } catch(e) {} activeRecognition = null; }
+
+  const textarea  = document.getElementById(`answer-${index}`);
+  const micBtn    = document.getElementById(`mic-${index}`);
+  const dot       = document.getElementById('status-dot');
+  const statusTxt = document.getElementById('status-text');
+
+  let baseText = textarea.value;
+  if (baseText && !baseText.endsWith(' ')) baseText += ' ';
+
+  recordingActive = true;
+  activeRecognitionIndex = index;
+
+  function launch() {
+    if (!recordingActive) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    r.continuous = false;
+    r.interimResults = true;
+    r.lang = 'zh-CN';
+
+    r.onstart = () => {
+      activeRecognition = r;
+      micBtn.classList.add('recording');
+      dot.className = 'status-dot recording';
+      statusTxt.textContent = `正在监听第 ${index + 1} 题… 请开始说话`;
+    };
+
+    r.onresult = (e) => {
+      if (!e.results || e.results.length === 0) return;
+      const res = e.results[0];
+      if (res.isFinal) {
+        baseText += res[0].transcript;
+        textarea.value = baseText;
+      } else {
+        textarea.value = baseText + res[0].transcript;
+      }
+      onAnswerInput();
+      textarea.scrollTop = textarea.scrollHeight;
+    };
+
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        showToast('麦克风访问被拒绝 — 请在浏览器中授权使用麦克风。', 'info');
+        recordingActive = false;
+        stopSpeech(index);
+      }
+    };
+
+    r.onend = () => {
+      activeRecognition = null;
+      if (recordingActive) {
+        setTimeout(launch, 200);
+      } else {
+        stopSpeech(index);
+      }
+    };
+
+    try { r.start(); }
+    catch(err) { if (recordingActive) setTimeout(launch, 400); }
+  }
+
+  launch();
+}
+
+function stopSpeech(index) {
+  recordingActive = false;
+  const micBtn = document.getElementById(`mic-${index}`);
+  if (micBtn) micBtn.classList.remove('recording');
+  document.getElementById('status-dot').className = 'status-dot done';
+  document.getElementById('status-text').textContent = '完成 — 点击其他输入框并按空格键继续，或直接键入。';
+  activeRecognition = null;
+  activeRecognitionIndex = null;
+  onAnswerInput();
+}
+
+function onAnswerInput() { updateProgress(); }
+
+function updateProgress() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  let answered = 0;
+  questions.forEach((_, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    if (ta && ta.value.trim().length > 0) answered++;
+  });
+  const pct = Math.round((answered / questions.length) * 100);
+  document.getElementById('progress-label').textContent = `已回答 ${answered} / ${questions.length} 道题`;
+  document.getElementById('progress-pct').textContent = `${pct}%`;
+  document.getElementById('progress-fill').style.width = pct + '%';
+  document.getElementById('export-section').classList[answered > 0 ? 'add' : 'remove']('visible');
+}
+
+function buildMarkdown() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  const industries = {
+    legal: '法律', accountant: '会计与财务', realestate: '房地产',
+    marketing: '营销机构', cleaning: '工业清洁', construction: '建筑施工',
+    restaurants: '餐饮', hospitality: '酒店、住宿与露营', other: '其他'
+  };
+  const label = industries[currentIndustry] || '企业';
+  const date  = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
+  let md = `# 中小企业知识档案 — ${label}\n**生成日期：** ${date}\n\n---\n\n## 企业概况\n\n**行业：** ${label}\n\n---\n\n## 详细回答\n\n`;
+  questions.forEach((item, i) => {
+    const ta = document.getElementById(`answer-${i}`);
+    const answer = ta ? ta.value.trim() : '';
+    md += `### ${i + 1}. ${item.q}\n\n${answer || '*(未提供回答)*'}\n\n`;
+  });
+  md += `---\n\n*本文档由中小企业知识提取工具生成。将此内容粘贴到 Claude 或其他 AI 工具中，即可创建业务文档。*\n`;
+  return md;
+}
+
+function copyMarkdown() {
+  const md = buildMarkdown();
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById('copy-btn');
+    btn.className = 'btn btn-success';
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 已复制！`;
+    showToast('Markdown 已复制到剪贴板', 'success');
+    setTimeout(() => {
+      btn.className = 'btn btn-primary';
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 复制为 Markdown`;
+    }, 2500);
+  }).catch(() => showToast('无法访问剪贴板 — 请尝试下载按钮', 'info'));
+}
+
+function downloadMarkdown() {
+  const md = buildMarkdown();
+  const slugs = { legal:'falv', accountant:'kuaiji', realestate:'fangdichan', marketing:'yingxiao', cleaning:'qingjie', construction:'jianzhu', restaurants:'canyin', hospitality:'jiudian', other:'qiye' };
+  const filename = `sme-knowledge-${slugs[currentIndustry] || 'qiye'}-${Date.now()}.md`;
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = filename; a.click();
+  URL.revokeObjectURL(url);
+  showToast('Markdown 文件已下载', 'success');
+}
+
+function clearAll() {
+  const questions = QUESTIONS[currentIndustry] || [];
+  if (!questions.length) return;
+  const hasContent = questions.some((_, i) => { const ta = document.getElementById(`answer-${i}`); return ta && ta.value.trim().length > 0; });
+  if (!hasContent || confirm('确认清除该行业的所有回答？')) {
+    questions.forEach((_, i) => { const ta = document.getElementById(`answer-${i}`); if (ta) ta.value = ''; });
+    if (activeRecognition) activeRecognition.stop();
+    updateProgress();
+    showToast('所有回答已清除', 'info');
+  }
+}
+
+let toastTimer;
+function showToast(msg, type = '') {
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.className = `show${type ? ' ' + type : ''}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { toast.className = ''; }, 3000);
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
