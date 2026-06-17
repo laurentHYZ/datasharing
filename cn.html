@@ -1,15 +1,15 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh-TW">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>中小企业知识提取 · v4</title>
+  <title>中小企業知識提取 · v4</title>
   <style>
     :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --surface2: #22263a;
-      --border: #2e3350;
+      --bg: #110909;
+      --surface: #1c1111;
+      --surface2: #261818;
+      --border: #3d2424;
       --accent: #6366f1;
       --accent-hover: #818cf8;
       --accent-glow: rgba(99, 102, 241, 0.18);
@@ -21,13 +21,13 @@
       --text-dim: #5a5e78;
       --radius: 12px;
       --radius-sm: 8px;
-      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+      --shadow: 0 4px 24px rgba(0,0,0,0.5);
     }
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', Roboto, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang TC', 'Microsoft JhengHei', Roboto, sans-serif;
       background: var(--bg);
       color: var(--text);
       min-height: 100vh;
@@ -358,32 +358,32 @@
 <div class="lang-switcher">
   <a class="lang-btn" href="index.html">🇬🇧 English</a>
   <a class="lang-btn" href="fr.html">🇫🇷 Français</a>
-  <span class="lang-btn active">🇨🇳 中文</span>
+  <span class="lang-btn active">🇨🇳 繁體中文</span>
 </div>
 
 <div class="header">
-  <div class="badge">中小企业知识工具 &nbsp;·&nbsp; <span style="color:#22c55e">v4</span></div>
-  <h1>业务知识提取</h1>
-  <p>回答以下问题，为您的企业创建结构化知识档案。使用麦克风口述回答，然后导出为 Markdown 格式，粘贴到 Claude 或其他 AI 工具中生成业务文档、流程或策略。</p>
+  <div class="badge">中小企業知識工具 &nbsp;·&nbsp; <span style="color:#22c55e">v4</span></div>
+  <h1>業務知識提取</h1>
+  <p>回答以下問題，為您的企業建立結構化知識檔案。使用麥克風口述回答，然後匯出為 Markdown 格式，供 Claude 或其他 AI 工具使用，生成業務文件、流程或策略。</p>
 </div>
 
 <div class="speech-warn" id="speech-warn">
-  您的浏览器不支持 Web Speech API，语音输入功能已禁用。建议使用 Chrome 或 Edge 浏览器以启用语音识别。
+  您的瀏覽器不支援 Web Speech API，語音輸入功能已停用。建議使用 Chrome 或 Edge 瀏覽器以啟用語音辨識。
 </div>
 
 <div class="card">
-  <div class="card-label">第一步 — 选择您的行业</div>
+  <div class="card-label">第一步 — 選擇您的行業</div>
   <div class="select-wrapper">
-    <select id="industry-select" aria-label="选择您的行业">
-      <option value="">请选择您的行业...</option>
+    <select id="industry-select" aria-label="選擇您的行業">
+      <option value="">請選擇您的行業...</option>
       <option value="legal">法律</option>
-      <option value="accountant">会计与财务</option>
-      <option value="realestate">房地产</option>
-      <option value="marketing">营销机构</option>
-      <option value="cleaning">工业清洁</option>
-      <option value="construction">建筑施工</option>
-      <option value="restaurants">餐饮</option>
-      <option value="hospitality">酒店、住宿与露营</option>
+      <option value="accountant">會計與財務</option>
+      <option value="realestate">房地產</option>
+      <option value="marketing">行銷機構</option>
+      <option value="cleaning">工業清潔</option>
+      <option value="construction">建築施工</option>
+      <option value="restaurants">餐飲</option>
+      <option value="hospitality">飯店、住宿與露營</option>
       <option value="other">其他</option>
     </select>
   </div>
@@ -391,19 +391,19 @@
 
 <div id="empty-state">
   <div class="icon">🏢</div>
-  <p>请在上方选择您的行业，查看针对您的商业模式、挑战和工作流程量身定制的问题。</p>
+  <p>請在上方選擇您的行業，查看針對您的商業模式、挑戰和工作流程量身訂製的問題。</p>
 </div>
 
 <div id="questions-section">
   <div class="section-header">
-    <h2>您的问题</h2>
+    <h2>您的問題</h2>
     <div class="line"></div>
-    <div class="count" id="q-count">0 道题</div>
+    <div class="count" id="q-count">0 道題</div>
   </div>
 
   <div class="progress-wrap">
     <div class="progress-info">
-      <span id="progress-label">已回答 0 / 0 道题</span>
+      <span id="progress-label">已回答 0 / 0 道題</span>
       <span id="progress-pct">0%</span>
     </div>
     <div class="progress-track">
@@ -413,23 +413,23 @@
 
   <div class="status-bar">
     <div class="status-dot" id="status-dot"></div>
-    <span id="status-text">就绪 — 点击输入框后按空格键，或点击麦克风图标开始录音</span>
+    <span id="status-text">就緒 — 點擊輸入框後按空格鍵，或點擊麥克風圖示開始錄音</span>
   </div>
 
   <div id="questions-container"></div>
 
   <div id="export-section">
     <div class="export-card">
-      <h3>导出您的知识档案</h3>
-      <p>您的回答已准备好导出为结构化 Markdown 文件——直接粘贴到 Claude 或其他 AI 工具中，即可生成业务文档、操作流程或发展策略。</p>
+      <h3>匯出您的知識檔案</h3>
+      <p>您的回答已準備好匯出為結構化 Markdown 檔案——直接貼上到 Claude 或其他 AI 工具中，即可生成業務文件、操作流程或發展策略。</p>
       <div class="export-actions">
         <button class="btn btn-primary" id="copy-btn" onclick="copyMarkdown()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
-          复制为 Markdown
+          複製為 Markdown
         </button>
         <button class="btn btn-secondary" id="download-btn" onclick="downloadMarkdown()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          下载 .md 文件
+          下載 .md 檔案
         </button>
         <button class="btn btn-secondary" onclick="clearAll()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
@@ -445,112 +445,112 @@
 <script>
 const QUESTIONS = {
   legal: [
-    { q: "您专注于哪些法律领域？", hint: "如家庭法、公司法、刑法、移民、知识产权等" },
-    { q: "客户如何找到您，您的接案流程是怎样的？", hint: "从首次接触到签署委托协议的全过程" },
-    { q: "贵所典型案件的处理周期是怎样的？", hint: "阶段、里程碑、通常时长" },
-    { q: "您采用哪种收费模式，如何管理费用？", hint: "小时收费、固定收费、风险代理、预付款——以及使用的账单软件" },
-    { q: "如何跨所有活跃案件管理截止日期、庭期和任务？", hint: "您依赖的工具、流程或系统" },
-    { q: "您使用哪种案件管理或文档管理软件？", hint: "如 Clio、MyCase、NetDocuments、SharePoint 等" },
-    { q: "哪些职业道德或合规义务产生最多行政负担？", hint: "信托账户核算、利益冲突审查、律师协会要求等" },
-    { q: "如何管理客户沟通和安全文件共享？", hint: "电子邮件、客户门户、加密通讯等" },
-    { q: "什么事务占用最多时间，妨碍您处理计费工作？", hint: "行政任务、催要文件、跟进客户等" },
-    { q: "事务所的增长目标是什么，有哪些障碍？", hint: "招聘、市场营销、转介绍、专业化等" },
+    { q: "您專注於哪些法律領域？", hint: "如家事法、公司法、刑事法、移民、智慧財產權等" },
+    { q: "客戶如何找到您，您的接案流程是怎樣的？", hint: "從首次接觸到簽署委託協議的全過程" },
+    { q: "貴所典型案件的處理週期是怎樣的？", hint: "階段、里程碑、通常時長" },
+    { q: "您採用哪種收費模式，如何管理費用？", hint: "小時收費、固定收費、風險代理、預付款——以及您使用的帳單軟體" },
+    { q: "如何跨所有活躍案件管理截止日期、聽證和任務？", hint: "您依賴的工具、流程或系統" },
+    { q: "您使用哪種案件管理或文件管理軟體？", hint: "如 Clio、MyCase、NetDocuments、SharePoint 等" },
+    { q: "哪些職業道德或合規義務產生最多行政負擔？", hint: "信託帳戶會計、利益衝突核查、律師協會要求等" },
+    { q: "如何管理客戶溝通和安全文件共享？", hint: "電子郵件、客戶入口網站、加密通訊等" },
+    { q: "什麼佔用了最多時間，妨礙您處理計費工作？", hint: "行政任務、催要文件、追蹤客戶等" },
+    { q: "事務所的成長目標是什麼，有哪些障礙？", hint: "招募、市場行銷、轉介紹、專業化等" },
   ],
   accountant: [
-    { q: "您专注于哪些会计服务？", hint: "税务申报、记账、审计、财务顾问、薪资管理、司法会计等" },
-    { q: "您如何管理旺季的工作量高峰？", hint: "人员策略、客户档期安排、辅助工具" },
-    { q: "您为客户提供服务时使用哪些完整的软件工具链？", hint: "税务软件、会计平台、文档管理、沟通工具" },
-    { q: "您如何确定和构建收费标准？", hint: "固定费用、小时收费、价值定价、订阅制等" },
-    { q: "从初次通话到开始服务，客户入驻流程是怎样的？", hint: "委托协议、数据收集、入驻步骤、时间节点" },
-    { q: "新客户最常见的数据质量问题是什么？", hint: "账目混乱、凭证缺失、错误分类等" },
-    { q: "您如何跟上税法和监管变化？", hint: "继续教育、资讯订阅、行业团体等" },
-    { q: "如何管理客户沟通和成果交付？", hint: "电子邮件、门户平台、审阅会议、预期响应时间" },
-    { q: "哪些合规义务在运营上产生最大摩擦？", hint: "申报截止日期、电子申报要求、地方注册等" },
-    { q: "发展或扩张事务所的最大挑战是什么？", hint: "人员配置、自动化、客户获取、定价权等" },
+    { q: "您專注於哪些會計服務？", hint: "稅務申報、記帳、審計、財務顧問、薪資管理、法證會計等" },
+    { q: "您如何管理旺季的工作量高峰？", hint: "人員策略、客戶排期安排、輔助工具" },
+    { q: "您為客戶提供服務時使用哪些完整的軟體工具鏈？", hint: "稅務軟體、會計平台、文件管理、溝通工具" },
+    { q: "您如何確定和建構收費標準？", hint: "固定費用、小時收費、價值定價、訂閱制等" },
+    { q: "從初次通話到開始服務，客戶入駐流程是怎樣的？", hint: "委託書、資料收集、入駐步驟、時間節點" },
+    { q: "新客戶最常見的資料品質問題是什麼？", hint: "帳目混亂、憑證缺失、錯誤分類等" },
+    { q: "您如何跟上稅法和法規變化？", hint: "繼續教育、訂閱資訊、行業團體等" },
+    { q: "如何管理客戶溝通和成果交付？", hint: "電子郵件、入口網站、審閱會議、預期回應時間" },
+    { q: "哪些合規義務在營運上產生最大摩擦？", hint: "申報截止日期、電子申報要求、地方登記等" },
+    { q: "發展或擴張事務所的最大挑戰是什麼？", hint: "人員配置、自動化、客戶獲取、定價權等" },
   ],
   realestate: [
-    { q: "您专注于住宅、商业还是两者兼顾——主要服务哪些市场？", hint: "物业类型、地理区域、价格区间" },
-    { q: "您如何开发客户资源并建立买卖双方的业务渠道？", hint: "转介绍、房产平台、社交媒体、社区关系、开放参观等" },
-    { q: "描述从首次接触到交割过户的典型交易流程。", hint: "关键步骤、时间节点、涉及各方" },
-    { q: "如何管理房源——从准备、上架到收到报价？", hint: "拍照、平台发布、装修建议、看房安排、报价管理" },
-    { q: "您使用哪些 CRM 和交易管理工具？", hint: "CRM 软件、电子签名平台、看房追踪工具等" },
-    { q: "您的佣金结构是怎样的，如何处理价格谈判？", hint: "通常的分成比例、双边代理情况、您的谈判方式" },
-    { q: "如何与前客户保持联系以促进回头客和转介绍？", hint: "电子邮件营销、电话、活动、CRM 自动化等" },
-    { q: "如何处理行政工作——合同、合规、文书手续？", hint: "谁来处理、使用什么工具、有哪些瓶颈" },
-    { q: "目前哪些市场趋势或挑战对您的业务影响最大？", hint: "利率、房源数量、买家情绪、竞争等" },
-    { q: "今年什么改变对您的生产力或收入提升最大？", hint: "更多客户资源、更好的系统、团队建设、专业化、技术等" },
+    { q: "您專注於住宅、商業還是兩者兼顧——主要服務哪些市場？", hint: "物業類型、地理區域、價格區間" },
+    { q: "您如何開發客戶資源並建立買賣雙方的業務管道？", hint: "轉介紹、房產平台、社群媒體、社區關係、開放參觀等" },
+    { q: "描述從首次接觸到交割過戶的典型交易流程。", hint: "關鍵步驟、時間節點、涉及各方" },
+    { q: "如何管理房源——從準備、上架到收到報價？", hint: "拍攝、平台發布、裝修建議、看房安排、報價管理" },
+    { q: "您使用哪些 CRM 和交易管理工具？", hint: "CRM 軟體、電子簽名平台、看房追蹤工具等" },
+    { q: "您的佣金結構是怎樣的，如何處理價格談判？", hint: "通常的分成比例、雙邊代理情況、您的談判方式" },
+    { q: "如何與前客戶保持聯繫以促進回頭客和轉介紹？", hint: "電子郵件行銷、電話聯繫、活動邀約、CRM 自動化等" },
+    { q: "如何處理行政工作——合約、合規、書面手續？", hint: "誰來處理、使用什麼工具、有哪些瓶頸" },
+    { q: "目前哪些市場趨勢或挑戰對您的業務影響最大？", hint: "利率、房源數量、買家情緒、競爭等" },
+    { q: "今年什麼變化對您的生產力或收入提升最大？", hint: "更多客戶資源、更好的系統、團隊建立、專業化、科技等" },
   ],
   marketing: [
-    { q: "贵机构具体提供哪些服务？", hint: "SEO、付费广告、社交媒体、内容营销、电子邮件、品牌、建站、公关等" },
-    { q: "如何构建客户项目并设定收费标准？", hint: "月度服务费、单次项目、绩效导向、混合模式" },
-    { q: "客户入驻流程是怎样的？", hint: "需求发现、策略制定、账户设置、项目启动、首批交付物时间节点" },
-    { q: "如何向客户汇报成果并管理其预期？", hint: "汇报频率、格式、追踪的 KPI、使用的报告工具" },
-    { q: "您的团队日常使用哪些工具和平台？", hint: "项目管理、广告平台、数据分析、设计、CRM、沟通工具等" },
-    { q: "如何管理截止日期、产能和团队工作量？", hint: "哪些地方容易出问题、哪些运转良好、如何处理超负荷" },
-    { q: "如何处理工作范围蔓延和变更请求？", hint: "您的处理流程、合同条款、如何与客户沟通边界" },
-    { q: "团队结构是怎样的——正式员工、自由职业者还是海外外包？", hint: "岗位设置、招聘方式、工作分配" },
-    { q: "客户留存率如何，做了哪些工作来留住客户？", hint: "平均合作年限、流失原因、留存策略" },
-    { q: "目前最大的运营或增长挑战是什么？", hint: "人才、客户获取、价格竞争、交付质量、利润率等" },
+    { q: "貴機構具體提供哪些服務？", hint: "SEO、付費廣告、社群媒體、內容行銷、電子郵件、品牌、網站、公關等" },
+    { q: "如何建構客戶專案並設定收費標準？", hint: "月度服務費、單次專案、績效導向、混合模式" },
+    { q: "客戶入駐流程是怎樣的？", hint: "需求探索、策略制定、帳戶設置、專案啟動、首批交付物時間節點" },
+    { q: "如何向客戶匯報成果並管理其期望？", hint: "頻率、格式、追蹤的 KPI、使用的報告工具" },
+    { q: "您的團隊日常使用哪些工具和平台？", hint: "專案管理、廣告平台、數據分析、設計、CRM、溝通等" },
+    { q: "如何管理截止日期、產能和團隊工作量？", hint: "哪些地方容易出問題、哪些運作良好、如何處理超負荷" },
+    { q: "如何處理工作範圍延伸和變更請求？", hint: "您的處理流程、合約條款、如何與客戶溝通邊界" },
+    { q: "團隊結構是怎樣的——正式員工、自由工作者還是海外外包？", hint: "職位設置、招募方式、工作分配" },
+    { q: "客戶留存率如何，您做了哪些工作來留住客戶？", hint: "平均合作年限、流失原因、留存策略" },
+    { q: "目前最大的營運或成長挑戰是什麼？", hint: "人才招募、客戶獲取、價格競爭、交付品質、利潤率等" },
   ],
   cleaning: [
-    { q: "您清洁哪些类型的场所和表面？", hint: "商业办公楼、工业场所、施工后清洁、医疗机构、数据中心等" },
-    { q: "如何安排和调度团队到各个场所？", hint: "使用的软件、通讯方式、团队组织、打卡工具" },
-    { q: "您的报价和销售流程是怎样的？", hint: "现场勘查、定价标准、报价周期、成交率" },
-    { q: "如何管理清洁用品、化学品和设备库存？", hint: "采购、存储、用量追踪、供应商关系" },
-    { q: "您持有哪些安全、监管或环保认证？", hint: "质量认证、绿色标志、安全数据表管理、防护装备要求" },
-    { q: "如何确保质量控制并在客户投诉前发现问题？", hint: "巡检、核查表、客户验收、投诉处理流程" },
-    { q: "您的劳动力结构如何——直接雇员还是分包商？", hint: "招聘、培训、人员流动率、如何解决可靠性问题" },
-    { q: "如何管理客户关系、收集反馈和推进合同续签？", hint: "账户管理流程、升级处理机制、续签时间表" },
-    { q: "您的业务旺季是什么时候，如何为此做准备？", hint: "季节性规律、活动后清洁、年末高峰期" },
-    { q: "最大的运营挑战是什么——让您最担心的是什么？", hint: "人员可靠性、价格压力、设备、现金流等" },
+    { q: "您清潔哪些類型的場所和表面？", hint: "商業辦公室、工業場所、施工後清潔、醫療機構、資料中心等" },
+    { q: "如何安排和調度團隊到各個場所？", hint: "使用的軟體、通訊方式、團隊組織、打卡工具" },
+    { q: "您的報價和銷售流程是怎樣的？", hint: "現場勘查、定價標準、報價週期、成交率" },
+    { q: "如何管理清潔用品、化學品和設備庫存？", hint: "採購、存放、用量追蹤、供應商關係" },
+    { q: "您持有哪些安全、法規或環保認證？", hint: "品質認證、綠色標誌、安全資料表管理、防護裝備要求" },
+    { q: "如何確保品質管控並在客戶投訴前發現問題？", hint: "巡檢、核查表、客戶驗收、投訴處理流程" },
+    { q: "您的勞動力結構如何——直接雇員還是承包商？", hint: "招募、培訓、人員流動率、如何解決可靠性問題" },
+    { q: "如何管理客戶關係、收集回饋和推進合約續簽？", hint: "帳戶管理流程、升級處理機制、續簽時間表" },
+    { q: "您的業務旺季是什麼時候，如何為此做準備？", hint: "季節性規律、活動後清潔、年末高峰期" },
+    { q: "最大的營運挑戰是什麼——讓您最擔心的是什麼？", hint: "人員可靠性、價格壓力、設備維護、資金週轉等" },
   ],
   construction: [
-    { q: "您承接哪些类型的项目，专业领域是什么？", hint: "住宅、商业、室内装修、土木工程、专项工程——总承包还是分包" },
-    { q: "如何进行估算、投标并赢得合同？", hint: "估算流程、使用软件、利润目标、中标率" },
-    { q: "如何管理分包商和供应商关系？", hint: "资质筛选、合同管理、现场协调、付款条件、质量控制" },
-    { q: "您使用哪些施工现场和办公管理工具？", hint: "项目追踪软件、施工日志、文档管控等" },
-    { q: "如何处理施工许可、竣工验收和合规要求？", hint: "谁来跟进、时间节点、常见瓶颈、涉及地区" },
-    { q: "工程变更单的处理流程是怎样的——从识别到审批再到开票？", hint: "如何记录、定价并获得业主确认" },
-    { q: "如何管理施工现场安全？", hint: "安全管理计划、安全交底、事故报告、保险要求" },
-    { q: "典型项目的付款时间表是怎样的？", hint: "进度款、按里程碑开票、质保金扣留、现金流压力" },
-    { q: "如何管理采购和供应链风险？", hint: "采购提前期、价格上涨、供应商多元化" },
-    { q: "当前在手项目中最大的风险或挑战是什么？", hint: "劳动力短缺、材料成本、客户纠纷、资金、履约保证金等" },
+    { q: "您承接哪些類型的工程，專業領域是什麼？", hint: "住宅、商業、室內裝修、土木工程、專項工程——總承包還是分包" },
+    { q: "如何進行估算、投標並贏得合約？", hint: "估算流程、使用軟體、利潤目標、中標率" },
+    { q: "如何管理分包商和供應商關係？", hint: "資格審查、合約管理、現場協調、付款條件、品質管控" },
+    { q: "您使用哪些施工現場和辦公管理工具？", hint: "專案追蹤軟體、施工日誌、文件管控等" },
+    { q: "如何處理施工許可、驗收和合規要求？", hint: "誰來跟進、時間節點、常見瓶頸、涉及地區" },
+    { q: "工程變更單的處理流程是怎樣的——從識別到審批再到開立發票？", hint: "如何記錄、定價並獲得業主確認" },
+    { q: "如何管理施工現場安全？", hint: "安全管理計劃、安全講話、事故報告、保險要求" },
+    { q: "典型工程的付款時間表是怎樣的？", hint: "進度款、按里程碑開票、保固金扣留、現金流壓力" },
+    { q: "如何管理採購和供應鏈風險？", hint: "採購前置期、漲價風險、供應商多元化" },
+    { q: "當前在手工程中最大的風險或挑戰是什麼？", hint: "勞動力短缺、材料成本、客戶糾紛、資金、履約保證金等" },
   ],
   restaurants: [
-    { q: "您提供什么类型的餐饮和就餐体验？", hint: "餐厅定位、价格档次、服务方式（快餐、正餐等）、座位容量" },
-    { q: "如何管理菜单——菜品设计、定价和季节性更新？", hint: "由谁设计、更新频率、食材成本目标、毛利率" },
-    { q: "如何管理员工——招聘、培训、排班和人员流动？", hint: "岗位设置、招聘渠道、培训流程、人员流失原因" },
-    { q: "如何控制食材成本和管理库存？", hint: "采购流程、损耗追踪、供应商关系、目标食材成本率" },
-    { q: "您使用哪些收银系统和运营技术？", hint: "POS 系统、预订平台、线上点餐、库存管理、薪资、厨显等" },
-    { q: "除堂食外还有哪些营收渠道？", hint: "外卖平台、外带、上门配送、宴会外烩、活动包场等" },
-    { q: "如何营销餐厅并吸引新客？", hint: "社交媒体、谷歌/大众点评、电子邮件、会员计划、公关、活动等" },
-    { q: "如何管理最繁忙的服务时段？", hint: "备餐流程、人员配备、预订管理、避免服务瓶颈的方法" },
-    { q: "如何管理线上评论和餐厅口碑？", hint: "如何回应差评、如何引导好评" },
-    { q: "目前最主要的运营痛点是什么？", hint: "人力成本、食材成本、利润率、外卖平台佣金、租金、客源等" },
+    { q: "您提供什麼類型的餐飲和用餐體驗？", hint: "餐廳定位、價格檔次、服務方式（快餐、正餐等）、座位容量" },
+    { q: "如何管理菜單——菜品設計、定價和季節性更新？", hint: "由誰設計、更新頻率、食材成本目標、毛利率" },
+    { q: "如何管理員工——招募、培訓、排班和人員流動？", hint: "職位設置、招募管道、培訓流程、流失原因" },
+    { q: "如何控制食材成本和管理庫存？", hint: "訂貨流程、損耗追蹤、供應商關係、目標食材成本率" },
+    { q: "您使用哪些收銀系統和營運科技？", hint: "POS 系統、訂位系統、線上點餐、庫存管理、薪資、廚顯等" },
+    { q: "除堂食外還有哪些營收管道？", hint: "外送平台、外帶、到府外燴、活動、包場等" },
+    { q: "如何行銷餐廳並吸引新客？", hint: "社群媒體、Google、電子郵件、會員計劃、公關、活動等" },
+    { q: "如何管理最繁忙的服務時段？", hint: "備餐流程、人員備援、訂位管理、避免服務瓶頸的方法" },
+    { q: "如何管理線上評論和餐廳口碑？", hint: "如何回應負評、如何引導正面評論" },
+    { q: "目前最主要的營運痛點是什麼？", hint: "人力成本、食材成本、利潤率、外送平台佣金、租金、客源等" },
   ],
   hospitality: [
-    { q: "您经营什么类型的住宿，有多少套房/床位/场地？", hint: "酒店、精品民宿、农家乐、豪华露营、露营地、青旅、度假村——规模与结构" },
-    { q: "您使用哪些分销渠道，如何管理线上业务？", hint: "OTA（Booking.com、Airbnb、Expedia）、直接预订、渠道管理软件" },
-    { q: "如何管理定价和入住率（收益管理）？", hint: "动态定价、季节性价格、最短住宿要求、优惠折扣、使用工具" },
-    { q: "从预订到退房，客户旅程是怎样的？", hint: "预订确认、到达前沟通、入住办理、在住体验、退房手续" },
-    { q: "如何管理客房清洁、设施维护和房态更新？", hint: "排班安排、房间检查核查表、翻房时间、使用软件" },
-    { q: "您为住客提供哪些设施、活动或特色体验？", hint: "场内服务、本地合作伙伴、套餐产品、差异化亮点" },
-    { q: "如何处理客诉、问题和线上评价？", hint: "问题解决流程、补偿政策、如何回应公开评价" },
-    { q: "如何吸引新客并提升直接预订比例？", hint: "SEO、谷歌、社交媒体、邮件营销、会员计划、合作伙伴" },
-    { q: "旺季是什么时候，如何为此提前备战？", hint: "人员招募、物资备货、定价策略、运营调整" },
-    { q: "提升客户体验或增加营收的最大挑战是什么？", hint: "人员配置、OTA 依赖度、定价能力、资本投入、系统、营销等" },
+    { q: "您經營什麼類型的住宿，擁有多少套房／床位／場地？", hint: "飯店、精品旅館、民宿、豪華露營、露營地、青年旅館、度假村——規模與結構" },
+    { q: "您使用哪些銷售通路，如何管理線上業務？", hint: "OTA（Booking.com、Airbnb、Expedia）、直接預訂、通路管理軟體" },
+    { q: "如何管理定價和入住率（收益管理）？", hint: "動態定價、季節性價格、最短住宿要求、折扣優惠、使用工具" },
+    { q: "從預訂到退房，客戶旅程是怎樣的？", hint: "預訂確認、到達前溝通、辦理入住、住宿體驗、退房手續" },
+    { q: "如何管理客房清潔、設施維護和房態更新？", hint: "排班安排、房間檢查核查表、翻房時間、使用軟體" },
+    { q: "您為房客提供哪些設施、活動或特色體驗？", hint: "場內服務、在地合作夥伴、套裝產品、差異化亮點" },
+    { q: "如何處理客戶投訴、問題和線上評價？", hint: "問題解決流程、補償政策、如何回應公開評論" },
+    { q: "如何吸引新客並提升直接預訂比例？", hint: "SEO、Google、社群媒體、電子報、會員計劃、合作夥伴" },
+    { q: "旺季是什麼時候，如何為此提前備戰？", hint: "人員招募、物資備貨、定價策略、營運調整" },
+    { q: "提升客戶體驗或增加營收的最大挑戰是什麼？", hint: "人員配置、OTA 依賴、定價能力、資本投入、系統建設、行銷等" },
   ],
   other: [
-    { q: "描述您的企业——所在行业及提供的产品或服务。", hint: "业务类型、主要产品或服务、经营年限" },
-    { q: "您的理想客户是谁，通常如何接触到他们？", hint: "客户画像、人口特征、如何找到您、哪些渠道有效" },
-    { q: "您的营收模式是怎样的，如何进行定价？", hint: "一次性收费、周期性、订阅制、项目制、佣金制等" },
-    { q: "描述日常工作流程——实际经营企业是什么样的？", hint: "关键的重复性任务、谁做什么、工作如何从头到尾推进" },
-    { q: "团队或人力结构是怎样的？", hint: "正式员工、合同工、自由职业者——岗位设置和工作安排" },
-    { q: "运营企业依赖哪些技术和工具？", hint: "软件、平台、硬件——缺少它们就无法正常运转的关键工具" },
-    { q: "主要的运营瓶颈或痛点是什么？", hint: "工作在哪里卡顿、什么导致失误、什么占用时间过多" },
-    { q: "如何获取和留住客户？", hint: "营销渠道、销售流程、转介绍、留存机制、复购" },
-    { q: "需要处理哪些监管、法律或行业合规要求？", hint: "许可证、认证、报告义务、行业规则等" },
-    { q: "未来 12 个月内，什么变化对您的企业影响最大？", hint: "增长目标、需要解决的问题、需要建立的能力" },
+    { q: "描述您的企業——所在行業及提供的產品或服務。", hint: "業務類型、主要產品或服務、經營年限" },
+    { q: "您的理想客戶是誰，通常如何接觸到他們？", hint: "客戶輪廓、人口特徵、如何找到您、哪些管道有效" },
+    { q: "您的營收模式是怎樣的，如何定價？", hint: "一次性收費、週期性、訂閱制、專案制、佣金制等" },
+    { q: "描述日常工作流程——實際經營企業是什麼樣的？", hint: "關鍵的重複性任務、誰做什麼、工作如何從頭到尾推進" },
+    { q: "團隊或人力結構是怎樣的？", hint: "正式員工、合約工、自由工作者——職位設置和工作安排方式" },
+    { q: "經營企業依賴哪些科技和工具？", hint: "軟體、平台、硬體——缺少它們就無法正常運作的關鍵工具" },
+    { q: "主要的營運瓶頸或痛點是什麼？", hint: "工作在哪裡卡頓、什麼導致錯誤、什麼佔用時間過多" },
+    { q: "如何獲取和留住客戶？", hint: "行銷管道、銷售流程、轉介紹、留存機制、複購" },
+    { q: "需要處理哪些監管、法律或行業合規要求？", hint: "許可證、認證、申報義務、行業規範等" },
+    { q: "未來 12 個月內，什麼變化對您的企業影響最大？", hint: "成長目標、需要解決的問題、需要建立的能力" },
   ],
 };
 
@@ -584,7 +584,7 @@ function renderQuestions(industry) {
   const questions = QUESTIONS[industry] || [];
   const container = document.getElementById('questions-container');
   container.innerHTML = '';
-  document.getElementById('q-count').textContent = `${questions.length} 道题`;
+  document.getElementById('q-count').textContent = `${questions.length} 道題`;
   document.getElementById('export-section').classList.remove('visible');
 
   questions.forEach((item, i) => {
@@ -599,7 +599,7 @@ function renderQuestions(industry) {
       <div class="q-input-row">
         <textarea
           id="answer-${i}"
-          placeholder="输入您的回答，或按空格键 / 点击 🎤 进行语音输入…"
+          placeholder="輸入您的回答，或按空格鍵 / 點擊 🎤 進行語音輸入…"
           rows="3"
           aria-label="回答：${escHtml(item.q)}"
           oninput="onAnswerInput()"
@@ -610,8 +610,8 @@ function renderQuestions(industry) {
           class="mic-btn${speechSupported ? '' : ' unsupported'}"
           id="mic-${i}"
           onclick="toggleSpeech(${i})"
-          title="${speechSupported ? '点击以语音输入回答' : '此浏览器不支持语音输入'}"
-          aria-label="录音回答"
+          title="${speechSupported ? '點擊以語音輸入回答' : '此瀏覽器不支援語音輸入'}"
+          aria-label="錄音回答"
           ${speechSupported ? '' : 'disabled'}
         >
           <svg class="mic-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -637,7 +637,7 @@ function onTextareaFocus(index) {
     activeRecognition = null;
     activeRecognitionIndex = null;
     document.getElementById('status-dot').className = 'status-dot';
-    document.getElementById('status-text').textContent = '录音已停止 — 按空格键或点击麦克风图标在此处继续录音。';
+    document.getElementById('status-text').textContent = '錄音已停止 — 按空格鍵或點擊麥克風圖示在此處繼續錄音。';
   }
 }
 
@@ -678,13 +678,13 @@ function toggleSpeech(index) {
     const r = new SR();
     r.continuous = false;
     r.interimResults = true;
-    r.lang = 'zh-CN';
+    r.lang = 'zh-TW';
 
     r.onstart = () => {
       activeRecognition = r;
       micBtn.classList.add('recording');
       dot.className = 'status-dot recording';
-      statusTxt.textContent = `正在监听第 ${index + 1} 题… 请开始说话`;
+      statusTxt.textContent = `正在監聽第 ${index + 1} 題… 請開始說話`;
     };
 
     r.onresult = (e) => {
@@ -702,7 +702,7 @@ function toggleSpeech(index) {
 
     r.onerror = (e) => {
       if (e.error === 'not-allowed') {
-        showToast('麦克风访问被拒绝 — 请在浏览器中授权使用麦克风。', 'info');
+        showToast('麥克風存取被拒絕 — 請在瀏覽器中授權使用麥克風。', 'info');
         recordingActive = false;
         stopSpeech(index);
       }
@@ -729,7 +729,7 @@ function stopSpeech(index) {
   const micBtn = document.getElementById(`mic-${index}`);
   if (micBtn) micBtn.classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';
-  document.getElementById('status-text').textContent = '完成 — 点击其他输入框并按空格键继续，或直接键入。';
+  document.getElementById('status-text').textContent = '完成 — 點擊其他輸入框並按空格鍵繼續，或直接輸入。';
   activeRecognition = null;
   activeRecognitionIndex = null;
   onAnswerInput();
@@ -746,7 +746,7 @@ function updateProgress() {
     if (ta && ta.value.trim().length > 0) answered++;
   });
   const pct = Math.round((answered / questions.length) * 100);
-  document.getElementById('progress-label').textContent = `已回答 ${answered} / ${questions.length} 道题`;
+  document.getElementById('progress-label').textContent = `已回答 ${answered} / ${questions.length} 道題`;
   document.getElementById('progress-pct').textContent = `${pct}%`;
   document.getElementById('progress-fill').style.width = pct + '%';
   document.getElementById('export-section').classList[answered > 0 ? 'add' : 'remove']('visible');
@@ -755,19 +755,19 @@ function updateProgress() {
 function buildMarkdown() {
   const questions = QUESTIONS[currentIndustry] || [];
   const industries = {
-    legal: '法律', accountant: '会计与财务', realestate: '房地产',
-    marketing: '营销机构', cleaning: '工业清洁', construction: '建筑施工',
-    restaurants: '餐饮', hospitality: '酒店、住宿与露营', other: '其他'
+    legal: '法律', accountant: '會計與財務', realestate: '房地產',
+    marketing: '行銷機構', cleaning: '工業清潔', construction: '建築施工',
+    restaurants: '餐飲', hospitality: '飯店、住宿與露營', other: '其他'
   };
-  const label = industries[currentIndustry] || '企业';
-  const date  = new Date().toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric' });
-  let md = `# 中小企业知识档案 — ${label}\n**生成日期：** ${date}\n\n---\n\n## 企业概况\n\n**行业：** ${label}\n\n---\n\n## 详细回答\n\n`;
+  const label = industries[currentIndustry] || '企業';
+  const date  = new Date().toLocaleDateString('zh-TW', { year: 'numeric', month: 'long', day: 'numeric' });
+  let md = `# 中小企業知識檔案 — ${label}\n**建立日期：** ${date}\n\n---\n\n## 企業概況\n\n**行業：** ${label}\n\n---\n\n## 詳細回答\n\n`;
   questions.forEach((item, i) => {
     const ta = document.getElementById(`answer-${i}`);
     const answer = ta ? ta.value.trim() : '';
     md += `### ${i + 1}. ${item.q}\n\n${answer || '*(未提供回答)*'}\n\n`;
   });
-  md += `---\n\n*本文档由中小企业知识提取工具生成。将此内容粘贴到 Claude 或其他 AI 工具中，即可创建业务文档。*\n`;
+  md += `---\n\n*本文件由中小企業知識提取工具生成。將此內容貼上到 Claude 或其他 AI 工具中，即可建立業務文件。*\n`;
   return md;
 }
 
@@ -776,13 +776,13 @@ function copyMarkdown() {
   navigator.clipboard.writeText(md).then(() => {
     const btn = document.getElementById('copy-btn');
     btn.className = 'btn btn-success';
-    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 已复制！`;
-    showToast('Markdown 已复制到剪贴板', 'success');
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> 已複製！`;
+    showToast('Markdown 已複製到剪貼簿', 'success');
     setTimeout(() => {
       btn.className = 'btn btn-primary';
-      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 复制为 Markdown`;
+      btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> 複製為 Markdown`;
     }, 2500);
-  }).catch(() => showToast('无法访问剪贴板 — 请尝试下载按钮', 'info'));
+  }).catch(() => showToast('無法存取剪貼簿 — 請嘗試下載按鈕', 'info'));
 }
 
 function downloadMarkdown() {
@@ -794,14 +794,14 @@ function downloadMarkdown() {
   const a    = document.createElement('a');
   a.href = url; a.download = filename; a.click();
   URL.revokeObjectURL(url);
-  showToast('Markdown 文件已下载', 'success');
+  showToast('Markdown 檔案已下載', 'success');
 }
 
 function clearAll() {
   const questions = QUESTIONS[currentIndustry] || [];
   if (!questions.length) return;
   const hasContent = questions.some((_, i) => { const ta = document.getElementById(`answer-${i}`); return ta && ta.value.trim().length > 0; });
-  if (!hasContent || confirm('确认清除该行业的所有回答？')) {
+  if (!hasContent || confirm('確認清除該行業的所有回答？')) {
     questions.forEach((_, i) => { const ta = document.getElementById(`answer-${i}`); if (ta) ta.value = ''; });
     if (activeRecognition) activeRecognition.stop();
     updateProgress();
