@@ -1,0 +1,761 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Live Q&amp;A Capture</title>
+  <style>
+    :root {
+      --bg: #0f1117;
+      --surface: #1a1d27;
+      --surface2: #22263a;
+      --border: #2e3350;
+      --accent: #6366f1;
+      --accent-hover: #818cf8;
+      --accent-glow: rgba(99,102,241,0.18);
+      --danger: #ef4444;
+      --success: #22c55e;
+      --warning: #f59e0b;
+      --text: #e8eaf6;
+      --text-muted: #8b8fa8;
+      --text-dim: #5a5e78;
+      --radius: 12px;
+      --radius-sm: 8px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding: 24px 16px 80px;
+    }
+
+    /* Nav */
+    .nav {
+      max-width: 780px;
+      margin: 0 auto 20px;
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .nav a, .nav span {
+      font-size: 12px;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 20px;
+      text-decoration: none;
+    }
+    .nav .active {
+      border: 1px solid rgba(99,102,241,0.4);
+      background: rgba(99,102,241,0.18);
+      color: #818cf8;
+    }
+    .nav a {
+      border: 1px solid #2e3350;
+      background: #22263a;
+      color: #8b8fa8;
+    }
+
+    /* Header */
+    .header {
+      max-width: 780px;
+      margin: 0 auto 32px;
+      text-align: center;
+    }
+    .header .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent);
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-bottom: 14px;
+    }
+    .header h1 {
+      font-size: clamp(22px, 5vw, 34px);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      background: linear-gradient(135deg, #e8eaf6 30%, var(--accent-hover));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+    }
+    .header p {
+      color: var(--text-muted);
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 520px;
+      margin: 0 auto;
+    }
+
+    /* Card */
+    .card {
+      max-width: 780px;
+      margin: 0 auto 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      box-shadow: var(--shadow);
+    }
+    .card-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    /* Inputs */
+    input[type=text], textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: 14px;
+      line-height: 1.55;
+      padding: 12px 14px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    input[type=text]::placeholder, textarea::placeholder { color: var(--text-dim); }
+    input[type=text]:focus, textarea:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+    textarea { resize: vertical; min-height: 72px; }
+
+    /* Capture row */
+    .capture-row {
+      display: flex;
+      gap: 8px;
+      align-items: flex-start;
+      margin-bottom: 12px;
+    }
+    .capture-row textarea { flex: 1; }
+
+    /* Mic */
+    .mic-btn {
+      flex-shrink: 0;
+      width: 46px;
+      height: 46px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      color: var(--text-muted);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      outline: none;
+    }
+    .mic-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-glow); }
+    .mic-btn.recording {
+      border-color: var(--danger);
+      background: rgba(239,68,68,0.12);
+      color: var(--danger);
+      animation: pulse-mic 1.2s ease-in-out infinite;
+    }
+    .mic-btn.unsupported { opacity: 0.3; cursor: not-allowed; }
+    @keyframes pulse-mic {
+      0%,100% { box-shadow: 0 0 0 0 rgba(239,68,68,0.3); }
+      50%      { box-shadow: 0 0 0 8px rgba(239,68,68,0); }
+    }
+
+    /* Status */
+    .status-bar {
+      max-width: 780px;
+      margin: 0 auto 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+      min-height: 18px;
+    }
+    .status-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--text-dim); flex-shrink: 0;
+    }
+    .status-dot.recording { background: var(--danger); animation: blink 1s step-start infinite; }
+    .status-dot.done { background: var(--success); }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 14px;
+      font-weight: 600;
+      padding: 10px 18px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+      outline: none;
+      font-family: inherit;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); transform: translateY(-1px); box-shadow: 0 4px 16px rgba(99,102,241,0.4); }
+    .btn-secondary { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+    .btn-danger { background: rgba(239,68,68,0.1); color: var(--danger); border: 1px solid rgba(239,68,68,0.25); }
+    .btn-danger:hover { background: rgba(239,68,68,0.2); }
+    .btn-sm { font-size: 12px; padding: 6px 12px; }
+    .btn-success { background: rgba(34,197,94,0.12); color: var(--success); border: 1px solid rgba(34,197,94,0.3); }
+
+    .add-btn-row { display: flex; gap: 8px; align-items: center; }
+
+    /* Q list */
+    #q-list { max-width: 780px; margin: 0 auto; }
+
+    .q-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 12px;
+      box-shadow: var(--shadow);
+      transition: border-color 0.2s;
+    }
+    .q-item:focus-within { border-color: rgba(99,102,241,0.35); }
+
+    .q-item-header {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .q-num {
+      flex-shrink: 0;
+      min-width: 28px;
+      height: 24px;
+      border-radius: 6px;
+      background: var(--accent-glow);
+      border: 1px solid rgba(99,102,241,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent-hover);
+      padding: 0 6px;
+      margin-top: 2px;
+    }
+    .q-text {
+      flex: 1;
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1.45;
+      background: transparent;
+      border: none;
+      outline: none;
+      resize: none;
+      min-height: 40px;
+      font-family: inherit;
+      padding: 0;
+    }
+    .q-text:focus { color: var(--accent-hover); }
+
+    .q-notes-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+      padding-left: 38px;
+    }
+    .q-notes {
+      margin-left: 38px;
+      width: calc(100% - 38px);
+      min-height: 60px;
+      font-size: 13px;
+    }
+
+    .q-actions {
+      margin-top: 10px;
+      padding-left: 38px;
+      display: flex;
+      gap: 6px;
+    }
+
+    /* Empty state */
+    #empty-state {
+      max-width: 780px;
+      margin: 0 auto;
+      text-align: center;
+      padding: 48px 24px;
+      color: var(--text-dim);
+    }
+    #empty-state .icon { font-size: 48px; margin-bottom: 14px; }
+    #empty-state p { font-size: 14px; line-height: 1.6; }
+
+    /* Export card */
+    .export-card {
+      max-width: 780px;
+      margin: 24px auto 0;
+      background: linear-gradient(135deg, rgba(99,102,241,0.08), rgba(99,102,241,0.03));
+      border: 1px solid rgba(99,102,241,0.25);
+      border-radius: var(--radius);
+      padding: 24px;
+    }
+    .export-card h3 { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+    .export-card p { font-size: 13px; color: var(--text-muted); margin-bottom: 18px; line-height: 1.5; }
+    .export-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
+      z-index: 100;
+      white-space: nowrap;
+      pointer-events: none;
+    }
+    #toast.show { transform: translateX(-50%) translateY(0); }
+    #toast.success { border-color: rgba(34,197,94,0.4); color: var(--success); }
+    #toast.info { border-color: rgba(99,102,241,0.4); color: var(--accent-hover); }
+    #toast.warn { border-color: rgba(245,158,11,0.4); color: var(--warning); }
+
+    /* speech warn */
+    .speech-warn {
+      max-width: 780px;
+      margin: 0 auto 14px;
+      background: rgba(245,158,11,0.08);
+      border: 1px solid rgba(245,158,11,0.3);
+      border-radius: var(--radius-sm);
+      padding: 10px 14px;
+      font-size: 13px;
+      color: var(--warning);
+      display: none;
+    }
+
+    @media (max-width: 600px) {
+      body { padding: 14px 10px 72px; }
+      .card, .q-item, .export-card { padding: 14px; }
+      .export-actions { flex-direction: column; }
+      .btn { width: 100%; justify-content: center; }
+      .q-notes, .q-actions, .q-notes-label { margin-left: 0; width: 100%; padding-left: 0; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<div class="nav">
+  <a href="index.html">🇬🇧 English</a>
+  <a href="fr.html">🇫🇷 Français</a>
+  <a href="cn.html">🇨🇳 中文</a>
+  <span class="active">🎤 Q&amp;A Capture</span>
+</div>
+
+<!-- Header -->
+<div class="header">
+  <div class="badge">Live Session Tool</div>
+  <h1>Q&amp;A Capture</h1>
+  <p>Capture participant questions in real time as you present. Add your notes per question, then export a RevealJS slide deck ready to present.</p>
+</div>
+
+<!-- Speech warn -->
+<div class="speech-warn" id="speech-warn">
+  Your browser does not support the Web Speech API. Voice capture is disabled — Chrome or Edge recommended.
+</div>
+
+<!-- Session title -->
+<div class="card">
+  <div class="card-label">Session Title (optional)</div>
+  <input type="text" id="session-title" placeholder="e.g. Introduction to AI Agents — Q&amp;A" oninput="saveState()" />
+</div>
+
+<!-- Capture card -->
+<div class="card">
+  <div class="card-label">Capture a Question</div>
+  <div class="capture-row">
+    <textarea id="new-q" placeholder="Type a participant question, or click the mic and speak it…" rows="2" onkeydown="captureOnEnter(event)"></textarea>
+    <button class="mic-btn" id="capture-mic" onclick="toggleCaptureSpeech()" title="Hold to dictate the question">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+        <line x1="12" y1="19" x2="12" y2="23"/>
+        <line x1="8" y1="23" x2="16" y2="23"/>
+      </svg>
+    </button>
+  </div>
+  <div class="add-btn-row">
+    <button class="btn btn-primary" onclick="addQuestion()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      Add Question
+    </button>
+    <span style="font-size:12px;color:var(--text-dim)">or press Ctrl+Enter</span>
+  </div>
+</div>
+
+<!-- Status -->
+<div class="status-bar">
+  <div class="status-dot" id="status-dot"></div>
+  <span id="status-text">Ready — click the mic or type to capture a question</span>
+</div>
+
+<!-- Empty state -->
+<div id="empty-state">
+  <div class="icon">❓</div>
+  <p>No questions captured yet.<br>Questions will appear here as you add them.</p>
+</div>
+
+<!-- Question list -->
+<div id="q-list"></div>
+
+<!-- Export (hidden until there are questions) -->
+<div class="export-card" id="export-card" style="display:none">
+  <h3>Export Your Q&amp;A</h3>
+  <p>Download a ready-to-present RevealJS slide deck — one slide per question, with your notes as speaker notes. Or copy as Markdown to paste into any tool.</p>
+  <div class="export-actions">
+    <button class="btn btn-primary" onclick="exportReveal()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      Download RevealJS
+    </button>
+    <button class="btn btn-secondary" onclick="copyMarkdown()" id="copy-md-btn">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+      Copy as Markdown
+    </button>
+    <button class="btn btn-secondary" onclick="clearAll()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+      Clear Session
+    </button>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
+let questions = [];   // [{q: string, notes: string}]
+let captureRecognition = null;
+let captureActive = false;
+
+// ── Boot ──
+document.addEventListener('DOMContentLoaded', () => {
+  if (!speechSupported) {
+    document.getElementById('speech-warn').style.display = 'block';
+    document.getElementById('capture-mic').classList.add('unsupported');
+    document.getElementById('capture-mic').disabled = true;
+  }
+  loadState();
+});
+
+// ── Persistence ──
+function saveState() {
+  const title = document.getElementById('session-title').value;
+  localStorage.setItem('qa_title', title);
+  localStorage.setItem('qa_questions', JSON.stringify(questions));
+}
+
+function loadState() {
+  const title = localStorage.getItem('qa_title') || '';
+  document.getElementById('session-title').value = title;
+  try { questions = JSON.parse(localStorage.getItem('qa_questions') || '[]'); } catch(e) { questions = []; }
+  renderList();
+}
+
+// ── Add question ──
+function addQuestion() {
+  const ta = document.getElementById('new-q');
+  const text = ta.value.trim();
+  if (!text) { showToast('Type or speak a question first', 'warn'); ta.focus(); return; }
+  questions.push({ q: text, notes: '' });
+  ta.value = '';
+  saveState();
+  renderList();
+  // scroll last item into view
+  setTimeout(() => {
+    const items = document.querySelectorAll('.q-item');
+    if (items.length) items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }, 50);
+  showToast(`Question ${questions.length} captured`, 'success');
+}
+
+function captureOnEnter(e) {
+  if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+    e.preventDefault();
+    addQuestion();
+  }
+}
+
+// ── Delete question ──
+function deleteQuestion(i) {
+  questions.splice(i, 1);
+  saveState();
+  renderList();
+}
+
+// ── Update notes ──
+function updateNotes(i, val) {
+  questions[i].notes = val;
+  saveState();
+}
+
+// ── Update question text ──
+function updateQuestion(i, val) {
+  questions[i].q = val;
+  saveState();
+}
+
+// ── Render ──
+function renderList() {
+  const list = document.getElementById('q-list');
+  const empty = document.getElementById('empty-state');
+  const exportCard = document.getElementById('export-card');
+
+  if (!questions.length) {
+    empty.style.display = 'block';
+    list.innerHTML = '';
+    exportCard.style.display = 'none';
+    return;
+  }
+  empty.style.display = 'none';
+  exportCard.style.display = 'block';
+
+  list.innerHTML = '';
+  questions.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'q-item';
+    div.innerHTML = `
+      <div class="q-item-header">
+        <div class="q-num">Q${i + 1}</div>
+        <textarea class="q-text" rows="2"
+          oninput="updateQuestion(${i}, this.value)"
+          aria-label="Question ${i + 1}"
+        >${escHtml(item.q)}</textarea>
+      </div>
+      <div class="q-notes-label">Your Notes / Answer</div>
+      <textarea class="q-notes"
+        placeholder="Add notes, key points, or your answer here…"
+        rows="3"
+        oninput="updateNotes(${i}, this.value)"
+        aria-label="Notes for question ${i + 1}"
+      >${escHtml(item.notes)}</textarea>
+      <div class="q-actions">
+        <button class="btn btn-danger btn-sm" onclick="deleteQuestion(${i})">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14H6L5 6"/><path d="M9 6V4h6v2"/></svg>
+          Remove
+        </button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+// ── Clear session ──
+function clearAll() {
+  if (!questions.length) return;
+  if (!confirm('Clear all captured questions for this session?')) return;
+  questions = [];
+  document.getElementById('session-title').value = '';
+  saveState();
+  renderList();
+  showToast('Session cleared', 'info');
+}
+
+// ── Speech capture ──
+function toggleCaptureSpeech() {
+  if (!speechSupported) return;
+  if (captureActive) {
+    captureActive = false;
+    if (captureRecognition) { try { captureRecognition.stop(); } catch(e) {} }
+    return;
+  }
+  captureActive = true;
+  const ta = document.getElementById('new-q');
+  const micBtn = document.getElementById('capture-mic');
+  const dot = document.getElementById('status-dot');
+  const statusTxt = document.getElementById('status-text');
+  let base = ta.value;
+  if (base && !base.endsWith(' ')) base += ' ';
+
+  function launch() {
+    if (!captureActive) return;
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const r = new SR();
+    r.continuous = false;
+    r.interimResults = true;
+    r.lang = 'en-US';
+    r.onstart = () => {
+      captureRecognition = r;
+      micBtn.classList.add('recording');
+      dot.className = 'status-dot recording';
+      statusTxt.textContent = 'Listening… speak the participant\'s question';
+    };
+    r.onresult = (e) => {
+      if (!e.results || !e.results.length) return;
+      const res = e.results[0];
+      if (res.isFinal) {
+        base += res[0].transcript + ' ';
+        ta.value = base;
+      } else {
+        ta.value = base + res[0].transcript;
+      }
+    };
+    r.onerror = (e) => {
+      if (e.error === 'not-allowed') {
+        showToast('Microphone access denied — please allow mic in your browser.', 'info');
+        captureActive = false;
+        stopCapture();
+      }
+    };
+    r.onend = () => {
+      captureRecognition = null;
+      if (captureActive) setTimeout(launch, 180);
+      else stopCapture();
+    };
+    try { r.start(); } catch(err) { if (captureActive) setTimeout(launch, 400); }
+  }
+  launch();
+}
+
+function stopCapture() {
+  captureActive = false;
+  document.getElementById('capture-mic').classList.remove('recording');
+  document.getElementById('status-dot').className = 'status-dot done';
+  document.getElementById('status-text').textContent = 'Done — click “Add Question” or press Ctrl+Enter to save it.';
+  captureRecognition = null;
+}
+
+// ── RevealJS export ──
+function exportReveal() {
+  if (!questions.length) { showToast('No questions to export', 'warn'); return; }
+  const title = document.getElementById('session-title').value.trim() || 'Q&A Session';
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+
+  const slides = questions.map((item, i) => {
+    const notes = item.notes.trim()
+      ? `<aside class="notes">${escHtml(item.notes)}</aside>`
+      : '';
+    return `
+    <section>
+      <h2 style="font-size:1.4em;line-height:1.35;margin-bottom:0.5em;">
+        <span style="font-size:0.55em;font-weight:400;opacity:0.6;display:block;margin-bottom:0.2em;">Question ${i + 1}</span>
+        ${escHtml(item.q)}
+      </h2>
+      ${notes}
+    </section>`;
+  }).join('\n');
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>${escHtml(title)}</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reset.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.css" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/theme/black.css" />
+  <style>
+    :root { --r-background-color: #0f1117; --r-main-color: #e8eaf6; --r-heading-color: #818cf8; }
+    .reveal .slides section { text-align: left; }
+    .reveal h1, .reveal h2 { font-weight: 800; letter-spacing: -0.02em; }
+    .reveal .title-slide { text-align: center; }
+    .reveal .meta { font-size: 0.45em; opacity: 0.55; font-weight: 400; }
+  </style>
+</head>
+<body>
+<div class="reveal">
+  <div class="slides">
+
+    <!-- Title slide -->
+    <section class="title-slide">
+      <h1>${escHtml(title)}</h1>
+      <p class="meta">${escHtml(date)} &nbsp;&bull;&nbsp; ${questions.length} question${questions.length !== 1 ? 's' : ''}</p>
+    </section>
+${slides}
+
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"><\/script>
+<script>
+  Reveal.initialize({
+    hash: true,
+    transition: 'slide',
+    backgroundTransition: 'fade',
+    controls: true,
+    progress: true,
+    center: true,
+    plugins: []
+  });
+<\/script>
+</body>
+</html>`;
+
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `qa-session-${Date.now()}.html`;
+  a.click();
+  URL.revokeObjectURL(url);
+  showToast('RevealJS deck downloaded', 'success');
+}
+
+// ── Markdown export ──
+function copyMarkdown() {
+  if (!questions.length) { showToast('No questions to export', 'warn'); return; }
+  const title = document.getElementById('session-title').value.trim() || 'Q&A Session';
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+  let md = `# ${title}\n**Date:** ${date}\n\n---\n\n`;
+  questions.forEach((item, i) => {
+    md += `## Q${i + 1}: ${item.q}\n\n`;
+    if (item.notes.trim()) md += `**Notes:** ${item.notes.trim()}\n\n`;
+    md += `---\n\n`;
+  });
+  navigator.clipboard.writeText(md).then(() => {
+    const btn = document.getElementById('copy-md-btn');
+    btn.className = 'btn btn-success';
+    btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Copied!`;
+    showToast('Markdown copied', 'success');
+    setTimeout(() => {
+      btn.className = 'btn btn-secondary';
+      btn.innerHTML = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg> Copy as Markdown`;
+    }, 2500);
+  }).catch(() => showToast('Clipboard unavailable — try the download button', 'info'));
+}
+
+// ── Utils ──
+let toastTimer;
+function showToast(msg, type = '') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = `show${type ? ' ' + type : ''}`;
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 3000);
+}
+
+function escHtml(str) {
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+</body>
+</html>
