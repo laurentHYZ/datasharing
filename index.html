@@ -431,6 +431,7 @@
 <div style="max-width:780px;margin:0 auto 20px;display:flex;justify-content:flex-end;gap:8px;">
   <span style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid rgba(99,102,241,0.4);background:rgba(99,102,241,0.18);color:#818cf8;">🇬🇧 English</span>
   <a href="fr.html" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid #2e3350;background:#22263a;color:#8b8fa8;text-decoration:none;">🇫🇷 Français</a>
+  <a href="cn.html" style="font-size:12px;font-weight:600;padding:5px 12px;border-radius:20px;border:1px solid #2e3350;background:#22263a;color:#8b8fa8;text-decoration:none;">🇨🇳 中文</a>
 </div>
 
 <!-- Header -->
@@ -534,6 +535,7 @@ const QUESTIONS = {
     { q: "How do you handle client communication and secure document sharing?", hint: "Email, client portals, encrypted messaging, etc." },
     { q: "What are your biggest time drains that keep you from billable work?", hint: "Admin tasks, chasing documents, client follow-ups, etc." },
     { q: "What does growth look like for your practice and what's blocking it?", hint: "Hiring, marketing, referrals, niche expansion, etc." },
+    { q: "Which software and digital tools do you use on a regular basis — beyond your legal-specific platforms?", hint: "List everything across all functions: email client, calendar, video calls (Zoom/Teams), e-signature, note-taking, accounting, CRM, team chat, file storage. Helps assess which tools already have MCP integrations." },
   ],
   accountant: [
     { q: "What accounting services do you specialize in?", hint: "Tax prep, bookkeeping, audit, CFO advisory, payroll, forensic, etc." },
@@ -546,6 +548,7 @@ const QUESTIONS = {
     { q: "How do you handle client communication and deliverable handoffs?", hint: "Email, portals, review calls, turnaround expectations." },
     { q: "What compliance or regulatory obligations create the most operational friction?", hint: "Filing deadlines, e-file mandates, state registrations, etc." },
     { q: "What is your biggest challenge to growing or scaling the practice?", hint: "Staff, automation, client acquisition, pricing power, etc." },
+    { q: "Beyond your core accounting and tax platforms, what other software and digital tools does your team use regularly?", hint: "List everything: email client, Slack/Teams, video conferencing, project management (Asana/Monday), document storage, e-signature, CRM, payroll tools, client portals. Helps assess which tools already have MCP integrations." },
   ],
   realestate: [
     { q: "Do you focus on residential, commercial, or both — and which markets?", hint: "Property types, geographic areas, price ranges." },
@@ -558,6 +561,7 @@ const QUESTIONS = {
     { q: "How do you handle the administrative side — contracts, compliance, paperwork?", hint: "Who handles it, what tools, what the bottlenecks are." },
     { q: "What market trends or challenges are most affecting your business right now?", hint: "Interest rates, inventory, buyer sentiment, competition, etc." },
     { q: "What would make the biggest difference to your productivity or income this year?", hint: "More leads, better systems, a team, niche focus, tech, etc." },
+    { q: "What software and digital tools do you use regularly across all aspects of your real estate business?", hint: "List everything: CRM (Follow Up Boss, LionDesk), MLS access, e-signature (DocuSign), email marketing (Mailchimp), accounting (QuickBooks), social media scheduling, virtual tour tools, video platforms, communication apps. Helps assess which tools already have MCP integrations." },
   ],
   marketing: [
     { q: "What specific services does your agency offer?", hint: "SEO, paid media, social, content, email, branding, web design, PR, etc." },
@@ -570,6 +574,7 @@ const QUESTIONS = {
     { q: "What does your team structure look like — employees, freelancers, offshore?", hint: "Roles, how you hire, how work is distributed." },
     { q: "What is your client retention rate and what do you do to keep clients?", hint: "Average tenure, churn reasons, retention strategies." },
     { q: "What is the biggest operational or growth challenge you're facing right now?", hint: "Talent, client acquisition, commoditization, delivery, margins, etc." },
+    { q: "What is your agency's complete software stack — including tools not directly tied to client deliverables?", hint: "List everything: CRM (HubSpot, Salesforce), project management (Asana, Monday, ClickUp), accounting/invoicing, payroll, file storage (Google Drive, Dropbox), internal communication (Slack, Teams), reporting dashboards. Helps assess which tools already have MCP integrations." },
   ],
   cleaning: [
     { q: "What types of facilities and surfaces do you clean?", hint: "Commercial offices, industrial plants, post-construction, medical, data centers, etc." },
@@ -582,6 +587,7 @@ const QUESTIONS = {
     { q: "How do you handle client communication, feedback, and contract renewals?", hint: "Account management process, escalation handling, renewal timing." },
     { q: "What are your peak demand periods and how do you prepare for them?", hint: "Seasonal patterns, post-event cleans, year-end pushes." },
     { q: "What is your biggest operational challenge — what keeps you up at night?", hint: "Staff reliability, pricing pressure, equipment, cash flow, etc." },
+    { q: "Which software and digital tools do you use to manage and run your cleaning business day-to-day?", hint: "List everything: scheduling/dispatch (Jobber, ServiceM8, ZenMaid), CRM, accounting (QuickBooks/Xero), communication apps, GPS tracking, time tracking, invoicing tools, payroll software. Helps assess which tools already have MCP integrations." },
   ],
   construction: [
     { q: "What types of projects do you take on and what is your specialty?", hint: "Residential, commercial, fit-out, civil, specific trades, GC vs sub." },
@@ -594,6 +600,7 @@ const QUESTIONS = {
     { q: "What does your typical project payment schedule look like?", hint: "Draw schedule, progress billing, retainage, cash flow challenges." },
     { q: "How do you handle materials procurement and manage supply chain risk?", hint: "Ordering lead times, price escalation, supplier diversification." },
     { q: "What are the biggest risks or challenges in your current pipeline?", hint: "Labor shortages, material costs, client disputes, cash flow, bonding, etc." },
+    { q: "What is your complete software and digital tool stack — both on job sites and in the office?", hint: "List everything: project management (Procore, Buildertrend, CoConstruct), estimating software, accounting (QuickBooks, Sage), CRM, e-signature, communication (Slack/Teams), GPS/fleet tracking, document management. Helps assess which tools already have MCP integrations." },
   ],
   restaurants: [
     { q: "What type of cuisine and dining experience do you offer?", hint: "Concept, price point, service style (fast casual, full service, etc.), seating capacity." },
@@ -606,6 +613,7 @@ const QUESTIONS = {
     { q: "How do you handle your busiest service periods?", hint: "Prep routines, staffing up, reservation management, how you avoid bottlenecks." },
     { q: "How do you manage online reviews and your restaurant's reputation?", hint: "How you respond to negative reviews, how you encourage positive ones." },
     { q: "What is your biggest operational pain point right now?", hint: "Labor costs, food costs, margins, delivery fees, lease, customer acquisition, etc." },
+    { q: "What software and digital tools do you use to manage your restaurant beyond the POS and reservations system?", hint: "List everything: accounting (QuickBooks/Xero), payroll (Gusto/ADP), inventory management, staff scheduling (7shifts, HotSchedules), email marketing, loyalty platform, delivery integrations (Otter, Deliverect), supplier ordering. Helps assess which tools already have MCP integrations." },
   ],
   hospitality: [
     { q: "What type of property do you operate and how many units or sites do you have?", hint: "Hotel, boutique inn, B&B, glamping, campground, hostel, resort — size and structure." },
@@ -618,6 +626,7 @@ const QUESTIONS = {
     { q: "How do you acquire new guests and build direct booking loyalty?", hint: "SEO, Google, social, email lists, loyalty programs, partnerships." },
     { q: "What does your peak season look like and how do you prepare for it?", hint: "Staffing up, inventory prep, pricing strategy, operational changes." },
     { q: "What is your biggest challenge to improving guest experience or growing revenue?", hint: "Staffing, OTA dependency, pricing power, capital, systems, marketing, etc." },
+    { q: "What is your full software and digital toolkit — from property management to guest communication and marketing?", hint: "List everything: PMS (Mews, Opera, Cloudbeds, Lodgify), channel manager (SiteMinder, Rentals United), CRM, accounting, guest messaging platform, review management, email marketing, housekeeping app. Helps assess which tools already have MCP integrations." },
   ],
   other: [
     { q: "Describe your business — what industry are you in and what do you sell or provide?", hint: "Type of business, main products or services, how long you've been operating." },
@@ -630,6 +639,7 @@ const QUESTIONS = {
     { q: "How do you acquire and retain customers?", hint: "Marketing channels, sales process, referrals, loyalty, repeat business." },
     { q: "What compliance, regulatory, or industry-specific requirements do you navigate?", hint: "Licenses, certifications, reporting, industry rules, etc." },
     { q: "What would make the biggest positive difference to your business in the next 12 months?", hint: "Growth goals, problems to solve, capabilities to build." },
+    { q: "List all the software and digital tools you rely on to run your business, across every function or department.", hint: "List everything: CRM, accounting, team communication (Slack/Teams), project management, e-commerce platform, scheduling, payroll, marketing automation, file storage, video calls. Helps assess which tools already have MCP integrations." },
   ],
 };
 
@@ -759,9 +769,6 @@ function toggleSpeech(index) {
     if (!recordingActive) return;
     const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
     const r = new SR();
-    // continuous:false = one utterance per session, no cumulative results array.
-    // Eliminates the Android bug where the array is replayed from the start.
-    // Manual restart in onend keeps recording going across pauses.
     r.continuous = false;
     r.interimResults = true;
     r.lang = 'en-US';
@@ -774,7 +781,6 @@ function toggleSpeech(index) {
     };
 
     r.onresult = (e) => {
-      // With continuous:false, e.results[0] is always THIS utterance only — no accumulation.
       if (!e.results || e.results.length === 0) return;
       const res = e.results[0];
       if (res.isFinal) {
@@ -793,13 +799,12 @@ function toggleSpeech(index) {
         recordingActive = false;
         stopSpeech(index);
       }
-      // no-speech / aborted / network: onend fires next, restart handles it
     };
 
     r.onend = () => {
       activeRecognition = null;
       if (recordingActive) {
-        setTimeout(launch, 200); // restart for next utterance
+        setTimeout(launch, 200);
       } else {
         stopSpeech(index);
       }
