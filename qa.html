@@ -193,6 +193,47 @@
     .status-dot.done { background: var(--success); }
     @keyframes blink { 50% { opacity: 0; } }
 
+    /* Keyboard shortcuts legend */
+    .shortcuts {
+      max-width: 780px;
+      margin: -4px auto 16px;
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .shortcuts-label {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .shortcut {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    kbd {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 24px;
+      height: 22px;
+      padding: 0 6px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-bottom-width: 2px;
+      border-radius: 5px;
+      font-family: inherit;
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--text-muted);
+      letter-spacing: 0;
+    }
+
     /* Buttons */
     .btn {
       display: inline-flex;
@@ -361,6 +402,7 @@
       .export-actions { flex-direction: column; }
       .btn { width: 100%; justify-content: center; }
       .q-notes, .q-actions, .q-notes-label { margin-left: 0; width: 100%; padding-left: 0; }
+      .shortcuts { gap: 10px; }
     }
   </style>
 </head>
@@ -396,8 +438,8 @@
 <div class="card">
   <div class="card-label">Capture a Question</div>
   <div class="capture-row">
-    <textarea id="new-q" placeholder="Type a participant question, or click the mic and speak it…" rows="2" onkeydown="captureOnEnter(event)"></textarea>
-    <button class="mic-btn" id="capture-mic" onclick="toggleCaptureSpeech()" title="Hold to dictate the question">
+    <textarea id="new-q" placeholder="Type a participant question, or press R / click the mic to record…" rows="2" onkeydown="captureOnEnter(event)"></textarea>
+    <button class="mic-btn" id="capture-mic" onclick="toggleCaptureSpeech()" title="Toggle mic (R)">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
         <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
@@ -411,14 +453,21 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       Add Question
     </button>
-    <span style="font-size:12px;color:var(--text-dim)">or press Ctrl+Enter</span>
   </div>
+</div>
+
+<!-- Keyboard shortcuts legend -->
+<div class="shortcuts">
+  <span class="shortcuts-label">Shortcuts</span>
+  <span class="shortcut"><kbd>R</kbd> toggle mic</span>
+  <span class="shortcut"><kbd>Enter</kbd> add question</span>
+  <span class="shortcut"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> add from text field</span>
 </div>
 
 <!-- Status -->
 <div class="status-bar">
   <div class="status-dot" id="status-dot"></div>
-  <span id="status-text">Ready — click the mic or type to capture a question</span>
+  <span id="status-text">Ready — press R to start recording, Enter to save</span>
 </div>
 
 <!-- Empty state -->
@@ -454,7 +503,7 @@
 
 <script>
 const speechSupported = 'webkitSpeechRecognition' in window || 'SpeechRecognition' in window;
-let questions = [];   // [{q: string, notes: string}]
+let questions = [];
 let captureRecognition = null;
 let captureActive = false;
 
@@ -466,18 +515,40 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('capture-mic').disabled = true;
   }
   loadState();
+  initKeyboardShortcuts();
 });
+
+// ── Keyboard shortcuts ──
+function initKeyboardShortcuts() {
+  document.addEventListener('keydown', (e) => {
+    const tag = (document.activeElement || {}).tagName;
+    const inInput = tag === 'INPUT' || tag === 'TEXTAREA';
+
+    // R — toggle mic (only when not typing in a field)
+    if ((e.key === 'r' || e.key === 'R') && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      if (speechSupported) toggleCaptureSpeech();
+      else showToast('Voice not supported in this browser', 'warn');
+      return;
+    }
+
+    // Enter — add question (only when not in a text field)
+    if (e.key === 'Enter' && !inInput && !e.ctrlKey && !e.metaKey && !e.altKey) {
+      e.preventDefault();
+      addQuestion();
+      return;
+    }
+  });
+}
 
 // ── Persistence ──
 function saveState() {
-  const title = document.getElementById('session-title').value;
-  localStorage.setItem('qa_title', title);
+  localStorage.setItem('qa_title', document.getElementById('session-title').value);
   localStorage.setItem('qa_questions', JSON.stringify(questions));
 }
 
 function loadState() {
-  const title = localStorage.getItem('qa_title') || '';
-  document.getElementById('session-title').value = title;
+  document.getElementById('session-title').value = localStorage.getItem('qa_title') || '';
   try { questions = JSON.parse(localStorage.getItem('qa_questions') || '[]'); } catch(e) { questions = []; }
   renderList();
 }
@@ -491,7 +562,6 @@ function addQuestion() {
   ta.value = '';
   saveState();
   renderList();
-  // scroll last item into view
   setTimeout(() => {
     const items = document.querySelectorAll('.q-item');
     if (items.length) items[items.length - 1].scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -506,20 +576,18 @@ function captureOnEnter(e) {
   }
 }
 
-// ── Delete question ──
+// ── Delete / update ──
 function deleteQuestion(i) {
   questions.splice(i, 1);
   saveState();
   renderList();
 }
 
-// ── Update notes ──
 function updateNotes(i, val) {
   questions[i].notes = val;
   saveState();
 }
 
-// ── Update question text ──
 function updateQuestion(i, val) {
   questions[i].q = val;
   saveState();
@@ -608,7 +676,7 @@ function toggleCaptureSpeech() {
       captureRecognition = r;
       micBtn.classList.add('recording');
       dot.className = 'status-dot recording';
-      statusTxt.textContent = 'Listening… speak the participant\'s question';
+      statusTxt.textContent = 'Listening… speak the participant\'s question  ·  press R to stop';
     };
     r.onresult = (e) => {
       if (!e.results || !e.results.length) return;
@@ -641,7 +709,7 @@ function stopCapture() {
   captureActive = false;
   document.getElementById('capture-mic').classList.remove('recording');
   document.getElementById('status-dot').className = 'status-dot done';
-  document.getElementById('status-text').textContent = 'Done — click “Add Question” or press Ctrl+Enter to save it.';
+  document.getElementById('status-text').textContent = 'Done — press Enter to save, or edit the text first.';
   captureRecognition = null;
 }
 
@@ -685,27 +753,16 @@ function exportReveal() {
 <body>
 <div class="reveal">
   <div class="slides">
-
-    <!-- Title slide -->
     <section class="title-slide">
       <h1>${escHtml(title)}</h1>
       <p class="meta">${escHtml(date)} &nbsp;&bull;&nbsp; ${questions.length} question${questions.length !== 1 ? 's' : ''}</p>
     </section>
 ${slides}
-
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/reveal.js@5/dist/reveal.js"><\/script>
 <script>
-  Reveal.initialize({
-    hash: true,
-    transition: 'slide',
-    backgroundTransition: 'fade',
-    controls: true,
-    progress: true,
-    center: true,
-    plugins: []
-  });
+  Reveal.initialize({ hash: true, transition: 'slide', backgroundTransition: 'fade', controls: true, progress: true, center: true });
 <\/script>
 </body>
 </html>`;
